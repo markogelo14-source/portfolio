@@ -11,11 +11,6 @@ const circularStd = localFont({
       weight: "400",
       style: "normal",
     },
-    {
-      path: "./fonts/CircularStd-Medium.ttf",
-      weight: "500",
-      style: "normal",
-    },
   ],
   variable: "--font-body",
   display: "swap",

@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { SiteFooter, SiteNav } from "./components";
-import { projects, siteData } from "./site-data";
+import { projects } from "./site-data";
 
 function getProjectCardStyle(project: (typeof projects)[number]) {
   return {
@@ -17,21 +17,20 @@ export default function Home() {
     <main className="portfolio-page">
       <SiteNav />
 
-      <section className="site-band home-intro" id="about">
-        <div className="identity-block in-block-dire">
-          <p className="identity-name">{siteData.name}</p>
-          <p className="identity-role">{siteData.role}</p>
+      <section className="site-band home-intro">
+        <div className="identity-block column">
+          <p className="identity-name">Marko Gelo</p>
+          <p className="identity-role">Product designer @ <a href="https://www.sofascore.com/hr"><span className="underline">Sofascore</span></a></p>
         </div>
 
-        <h1 className="statement">{siteData.statement}</h1>
+        <h1 className="statement">I like to design and experiment.</h1>
       </section>
 
       <section aria-label="Selected work" className="site-band project-stack" id="work">
-        {projects.map((project, index) => (
+        {projects.map((project) => (
           <Link
             className="project-card"
             href={`/projects/${project.slug}`}
-            id={index === 2 ? "play" : index === 4 ? "photos" : undefined}
             key={project.slug}
             style={getProjectCardStyle(project)}
           >

@@ -2,7 +2,6 @@ import localFont from "next/font/local";
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { siteData } from "./site-data";
 
 const circularStd = localFont({
   src: [
@@ -29,8 +28,9 @@ const romieTrial = localFont({
 });
 
 export const metadata: Metadata = {
-  title: `${siteData.name} | ${siteData.role}`,
-  description: siteData.description,
+  title: "Marko Gelo | Product designer @ Sofascore",
+  description:
+    "Editorial portfolio for Marko Gelo, a product designer building thoughtful digital experiences.",
 };
 
 export default function RootLayout({

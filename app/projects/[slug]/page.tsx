@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SiteFooter, SiteNav } from "../../components";
-import { getNextProject, getProjectBySlug, projects, siteData } from "../../site-data";
+import { getNextProject, getProjectBySlug, projects } from "../../site-data";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -34,13 +34,14 @@ export async function generateMetadata({
 
   if (!project) {
     return {
-      title: siteData.name,
-      description: siteData.description,
+      title: "Marko Gelo",
+      description:
+        "Editorial portfolio for Marko Gelo, a product designer building thoughtful digital experiences.",
     };
   }
 
   return {
-    title: `${project.name} | ${siteData.name}`,
+    title: `${project.name} | Marko Gelo`,
     description: project.detailDescription,
   };
 }
@@ -57,10 +58,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <main className="portfolio-page">
-      <SiteNav currentProject={project.name} />
+      <SiteNav
+        breadcrumb={{
+          backHref: "/",
+          label: "Work",
+          href: "/",
+          current: project.name,
+        }}
+      />
 
       <section className="site-band project-detail-stack">
-        <div className="detail-identity">
+        <div className="detail-identity column">
           <p className="identity-name">{project.name}</p>
           <h1 className="detail-intro">{project.detailIntro}</h1>
         </div>
@@ -71,7 +79,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           style={getSurfaceStyle(project.detailColor, project.detailAccent, project.detailGlow)}
         />
 
-        <section className="project-copy-block">
+        <section className="project-copy-block column">
           <h2 className="section-title">Project info</h2>
           <p className="project-body">{project.detailDescription}</p>
         </section>

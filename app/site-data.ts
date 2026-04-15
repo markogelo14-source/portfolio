@@ -1,22 +1,3 @@
-export const siteData = {
-  name: "Marko Gelo",
-  role: "Product designer @ Sofascore",
-  statement: "I like to design and experiment.",
-  description:
-    "Editorial portfolio for Marko Gelo, a product designer building thoughtful digital experiences.",
-  email: "markogelo14@gmail.com",
-  footerNote: "Designed + coded by Marko :)",
-  cvHref: "mailto:markogelo14@gmail.com?subject=Marko%20Gelo%20CV",
-} as const;
-
-export const navLinks = [
-  { label: "Work", href: "/#work" },
-  { label: "About", href: "/#about" },
-  { label: "Play", href: "/#play" },
-  { label: "Photos", href: "/#photos" },
-  { label: "Contact", href: "/#contact" },
-] as const;
-
 type ProjectMeta = {
   label: string;
   value: string;

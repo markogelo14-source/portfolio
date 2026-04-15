@@ -67,6 +67,9 @@ h3 {
 .next-project-card {
   display: flex;
 }
+.in-block-dire {
+  flex-direction: column;
+}
 
 .site-nav-shell,
 .site-footer-shell {

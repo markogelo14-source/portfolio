@@ -18,7 +18,7 @@ export default function Home() {
       <SiteNav />
 
       <section className="site-band home-intro" id="about">
-        <div className="identity-block">
+        <div className="identity-block in-block-dire">
           <p className="identity-name">{siteData.name}</p>
           <p className="identity-role">{siteData.role}</p>
         </div>

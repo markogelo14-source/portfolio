@@ -5,8 +5,8 @@
   --muted: rgba(0, 0, 0, 0.5);
   --soft-muted: rgba(0, 0, 0, 0.4);
   --border: rgba(0, 0, 0, 0.1);
-  --font-body: "Avenir Next", "Helvetica Neue", "Segoe UI", sans-serif;
-  --font-display: "Didot", "Bodoni 72", "Iowan Old Style", serif;
+  --font-body: "Circular Std", "Avenir Next", "Helvetica Neue", "Segoe UI", sans-serif;
+  --font-display: "Romie Trial", "Didot", "Bodoni 72", "Iowan Old Style", serif;
   --page-width: 1512px;
   --page-padding: clamp(1.25rem, 7vw, 18.75rem);
 }

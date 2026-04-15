@@ -1,85 +1,380 @@
 export const siteData = {
   name: "Marko Gelo",
-  role: "Front-end Developer",
-  status: "Building product experiences with a sharp visual point of view.",
-  location: "Croatia",
-  email: "hello@yourdomain.com",
+  role: "Product designer @ Sofascore",
+  statement: "I like to design and experiment.",
   description:
-    "A Next.js portfolio starter for showcasing selected work, your process, and a confident personal brand.",
-  intro:
-    "I build interfaces that feel clear, premium, and alive. This starter gives you a strong foundation to turn into a personal site, case study hub, or launchpad for freelance work.",
-  focus:
-    "Available for ambitious freelance builds, early-stage product collaboration, and design-minded front-end work.",
+    "Editorial portfolio for Marko Gelo, a product designer building thoughtful digital experiences.",
+  email: "markogelo14@gmail.com",
+  footerNote: "Designed + coded by Marko :)",
+  cvHref: "mailto:markogelo14@gmail.com?subject=Marko%20Gelo%20CV",
 } as const;
 
-export const stats = [
-  { value: "3", label: "ready-made case study slots" },
-  { value: "1", label: "focused homepage to customize" },
-  { value: "100%", label: "TypeScript app-router foundation" },
+export const navLinks = [
+  { label: "Work", href: "/#work" },
+  { label: "About", href: "/#about" },
+  { label: "Play", href: "/#play" },
+  { label: "Photos", href: "/#photos" },
+  { label: "Contact", href: "/#contact" },
 ] as const;
 
-export const featuredProjects = [
-  {
-    name: "Invitation Platform",
-    summary:
-      "A polished event product with invitation flows, guest management, and checkout-ready architecture.",
-    impact: "Next.js, Prisma, Stripe, MVP delivery",
-    href: "#work",
-    tags: ["Product build", "Checkout flow", "Admin UX"],
-  },
-  {
-    name: "Creative Landing System",
-    summary:
-      "A reusable landing page approach that pairs strong typography, modular sections, and a flexible storytelling rhythm.",
-    impact: "Design system thinking, conversion-oriented sections",
-    href: "#process",
-    tags: ["Brand expression", "Responsive UI", "Content flow"],
-  },
-  {
-    name: "Portfolio Engine",
-    summary:
-      "This new portfolio starter itself: structured to make iteration easy, whether you evolve it by hand or with Paper MCP.",
-    impact: "Fast edits, clean styling, design-friendly structure",
-    href: "#contact",
-    tags: ["Next.js", "Paper-ready", "Starter setup"],
-  },
-] as const;
+type ProjectMeta = {
+  label: string;
+  value: string;
+};
 
-export const principles = [
-  {
-    title: "Visual confidence",
-    body: "Interfaces should feel authored, not assembled from defaults.",
-  },
-  {
-    title: "Fast iteration",
-    body: "A strong structure matters because good ideas show up during revision, not before it.",
-  },
-  {
-    title: "Clean implementation",
-    body: "Readable code makes it easier to keep refining the experience instead of fighting it.",
-  },
-] as const;
+type ProjectPanel = {
+  label: string;
+  base: string;
+  accent: string;
+  glow: string;
+};
 
-export const timeline = [
-  {
-    period: "Now",
-    title: "Portfolio rebuild",
-    body: "Creating a new home base for projects, experiments, and future case studies.",
-  },
-  {
-    period: "Recent",
-    title: "Product MVP work",
-    body: "Shipping practical web experiences with authentication, dashboards, forms, and payment flows.",
-  },
-  {
-    period: "Always",
-    title: "Design-minded development",
-    body: "Using layout, type, motion, and product thinking together instead of treating them as separate layers.",
-  },
-] as const;
+export type Project = {
+  slug: string;
+  name: string;
+  kicker: string;
+  cardStatus?: string;
+  cardSummary: string;
+  cardColor: string;
+  cardAccent: string;
+  cardGlow: string;
+  detailIntro: string;
+  detailDescription: string;
+  detailColor: string;
+  detailAccent: string;
+  detailGlow: string;
+  meta: readonly ProjectMeta[];
+  gallery: readonly ProjectPanel[];
+};
 
-export const contactLinks = [
-  { label: "Email", href: "mailto:hello@yourdomain.com" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/your-handle" },
-  { label: "GitHub", href: "https://github.com/your-handle" },
-] as const;
+export const projects: readonly Project[] = [
+  {
+    slug: "sofascore",
+    name: "Sofascore",
+    kicker: "Mobile & Web app",
+    cardStatus: "Coming soon!",
+    cardSummary: "Working on the most advanced competition editor in the world.",
+    cardColor: "#ff407f",
+    cardAccent: "#ff5f9b",
+    cardGlow: "rgba(255, 158, 197, 0.65)",
+    detailIntro:
+      "Designing the next generation of tools that help live sports competitions stay fast, readable, and reliable.",
+    detailDescription:
+      "A broad product design effort focused on editorial speed, clearer hierarchy, and confident data-heavy layouts for sports coverage across devices.",
+    detailColor: "#d96d89",
+    detailAccent: "#f08ca3",
+    detailGlow: "rgba(255, 214, 226, 0.55)",
+    meta: [
+      {
+        label: "Services",
+        value: "Product Design / Interaction Design / Interface Systems",
+      },
+      {
+        label: "Project type",
+        value: "In-house platform work focused on complex operational tooling",
+      },
+      {
+        label: "Website",
+        value: "www.sofascore.com",
+      },
+    ],
+    gallery: [
+      {
+        label: "Competition editor overview",
+        base: "#c65c7d",
+        accent: "#df7d9a",
+        glow: "rgba(255, 219, 230, 0.48)",
+      },
+      {
+        label: "Publishing states",
+        base: "#b25474",
+        accent: "#d6728f",
+        glow: "rgba(255, 205, 220, 0.44)",
+      },
+      {
+        label: "System hierarchy",
+        base: "#cb6383",
+        accent: "#e48ca7",
+        glow: "rgba(255, 227, 235, 0.5)",
+      },
+      {
+        label: "Cross-platform audit",
+        base: "#ba5678",
+        accent: "#d97693",
+        glow: "rgba(255, 214, 226, 0.46)",
+      },
+      {
+        label: "Final interface review",
+        base: "#d36d8a",
+        accent: "#ef91ad",
+        glow: "rgba(255, 230, 238, 0.52)",
+      },
+    ],
+  },
+  {
+    slug: "dobar-tek",
+    name: "Dobar tek",
+    kicker: "Mobile app",
+    cardSummary:
+      "Crafting a mobile app for new generation of workplace lunch in Croatia",
+    cardColor: "#cb190c",
+    cardAccent: "#e22f1f",
+    cardGlow: "rgba(255, 173, 149, 0.62)",
+    detailIntro:
+      "Crafting a mobile app for new generation of workplace lunch in Croatia",
+    detailDescription:
+      "This mobile app simplifies food ordering at the office, offering insights into your colleagues' orders and providing monthly billing based on your previous month's spending.",
+    detailColor: "#96564d",
+    detailAccent: "#af6a61",
+    detailGlow: "rgba(237, 214, 209, 0.48)",
+    meta: [
+      {
+        label: "Services",
+        value: "User Interface Design / User Experience Design / Design systems",
+      },
+      {
+        label: "Project type",
+        value: "Sole designer, delivered as a part of team @ Blank",
+      },
+      {
+        label: "Website",
+        value: "www.dobartek.hr",
+      },
+    ],
+    gallery: [
+      {
+        label: "Ordering flow overview",
+        base: "#925449",
+        accent: "#ab695d",
+        glow: "rgba(234, 214, 210, 0.46)",
+      },
+      {
+        label: "Lunch preferences",
+        base: "#8a4d43",
+        accent: "#a76459",
+        glow: "rgba(230, 205, 199, 0.42)",
+      },
+      {
+        label: "Billing and spending",
+        base: "#9d5d52",
+        accent: "#b87468",
+        glow: "rgba(241, 223, 218, 0.5)",
+      },
+      {
+        label: "Office dashboard",
+        base: "#8f5147",
+        accent: "#a76459",
+        glow: "rgba(233, 210, 204, 0.45)",
+      },
+      {
+        label: "Final mobile states",
+        base: "#97584d",
+        accent: "#b16d62",
+        glow: "rgba(238, 218, 212, 0.48)",
+      },
+    ],
+  },
+  {
+    slug: "nutrivision",
+    name: "Nutrivision",
+    kicker: "Dashboard",
+    cardSummary:
+      "Premium eyewear brand's website that showcases advanced technology",
+    cardColor: "#0c6887",
+    cardAccent: "#2280a2",
+    cardGlow: "rgba(140, 225, 255, 0.58)",
+    detailIntro:
+      "Designing a focused health dashboard that helps people read trends instead of getting lost in charts.",
+    detailDescription:
+      "A calm data experience for nutrition tracking, with emphasis on daily patterns, gentle guidance, and high-legibility reporting for repeated use.",
+    detailColor: "#277996",
+    detailAccent: "#4497b4",
+    detailGlow: "rgba(199, 240, 255, 0.5)",
+    meta: [
+      {
+        label: "Services",
+        value: "Dashboard UX / Product Design / Information Architecture",
+      },
+      {
+        label: "Project type",
+        value: "Concept-driven product case study with system-level exploration",
+      },
+      {
+        label: "Website",
+        value: "Private concept",
+      },
+    ],
+    gallery: [
+      {
+        label: "Dashboard overview",
+        base: "#236f8d",
+        accent: "#3f89a6",
+        glow: "rgba(205, 241, 255, 0.42)",
+      },
+      {
+        label: "Health metrics",
+        base: "#1e6682",
+        accent: "#36809d",
+        glow: "rgba(189, 233, 249, 0.4)",
+      },
+      {
+        label: "Progress visualizations",
+        base: "#2b7693",
+        accent: "#4792af",
+        glow: "rgba(212, 243, 255, 0.46)",
+      },
+      {
+        label: "Daily summaries",
+        base: "#266c88",
+        accent: "#4285a1",
+        glow: "rgba(195, 236, 251, 0.44)",
+      },
+      {
+        label: "Responsive states",
+        base: "#2f7a96",
+        accent: "#4d99b5",
+        glow: "rgba(214, 244, 255, 0.48)",
+      },
+    ],
+  },
+  {
+    slug: "rocket",
+    name: "Rocket",
+    kicker: "Dashboard",
+    cardSummary:
+      "Redesigning the user interface for fast and secure WordPress hosting.",
+    cardColor: "#3aabcc",
+    cardAccent: "#5fc2df",
+    cardGlow: "rgba(189, 244, 255, 0.68)",
+    detailIntro:
+      "Refreshing a hosting dashboard to feel faster, lighter, and more trustworthy for technical and non-technical users alike.",
+    detailDescription:
+      "A UI refresh centered on clearer task grouping, simplified status communication, and a brighter interface language that lowers friction in high-frequency admin workflows.",
+    detailColor: "#5faec4",
+    detailAccent: "#7bc7db",
+    detailGlow: "rgba(220, 248, 255, 0.54)",
+    meta: [
+      {
+        label: "Services",
+        value: "Product Design / UI Refresh / Hosting Dashboard UX",
+      },
+      {
+        label: "Project type",
+        value: "B2B dashboard modernization with attention to trust signals",
+      },
+      {
+        label: "Website",
+        value: "Private client work",
+      },
+    ],
+    gallery: [
+      {
+        label: "Hosting overview",
+        base: "#58abc1",
+        accent: "#79c5d8",
+        glow: "rgba(222, 248, 255, 0.46)",
+      },
+      {
+        label: "Server controls",
+        base: "#4ca4bb",
+        accent: "#6fbed2",
+        glow: "rgba(205, 242, 252, 0.42)",
+      },
+      {
+        label: "Security states",
+        base: "#60b2c9",
+        accent: "#83ccdf",
+        glow: "rgba(224, 248, 255, 0.5)",
+      },
+      {
+        label: "Billing workflows",
+        base: "#54a9c0",
+        accent: "#75c0d4",
+        glow: "rgba(212, 244, 252, 0.44)",
+      },
+      {
+        label: "Dashboard polish",
+        base: "#65b6cd",
+        accent: "#88d0e2",
+        glow: "rgba(226, 249, 255, 0.52)",
+      },
+    ],
+  },
+  {
+    slug: "hyperlight",
+    name: "Hyperlight",
+    kicker: "Website / Ecommerce",
+    cardSummary:
+      "Premium eyewear brand's website that showcases advanced technology",
+    cardColor: "#000000",
+    cardAccent: "#191919",
+    cardGlow: "rgba(255, 255, 255, 0.2)",
+    detailIntro:
+      "Building a premium commerce direction that balances technical storytelling with a restrained, luxury pace.",
+    detailDescription:
+      "An ecommerce concept for a performance eyewear brand, using contrast, motion cues, and editorial product framing to make the technology feel desirable instead of clinical.",
+    detailColor: "#1f1f1f",
+    detailAccent: "#353535",
+    detailGlow: "rgba(255, 255, 255, 0.18)",
+    meta: [
+      {
+        label: "Services",
+        value: "Brand Expression / Ecommerce UX / Visual Direction",
+      },
+      {
+        label: "Project type",
+        value: "Premium retail concept focused on storytelling and conversion",
+      },
+      {
+        label: "Website",
+        value: "Concept exploration",
+      },
+    ],
+    gallery: [
+      {
+        label: "Editorial landing view",
+        base: "#171717",
+        accent: "#292929",
+        glow: "rgba(255, 255, 255, 0.12)",
+      },
+      {
+        label: "Technology storytelling",
+        base: "#131313",
+        accent: "#242424",
+        glow: "rgba(255, 255, 255, 0.1)",
+      },
+      {
+        label: "Product spotlight",
+        base: "#1c1c1c",
+        accent: "#2f2f2f",
+        glow: "rgba(255, 255, 255, 0.13)",
+      },
+      {
+        label: "Shop states",
+        base: "#141414",
+        accent: "#252525",
+        glow: "rgba(255, 255, 255, 0.11)",
+      },
+      {
+        label: "Checkout rhythm",
+        base: "#202020",
+        accent: "#353535",
+        glow: "rgba(255, 255, 255, 0.14)",
+      },
+    ],
+  },
+];
+
+export function getProjectBySlug(slug: string) {
+  return projects.find((project) => project.slug === slug);
+}
+
+export function getNextProject(slug: string) {
+  const currentIndex = projects.findIndex((project) => project.slug === slug);
+
+  if (currentIndex === -1) {
+    return null;
+  }
+
+  return projects[(currentIndex + 1) % projects.length];
+}

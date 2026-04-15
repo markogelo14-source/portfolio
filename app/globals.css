@@ -7,7 +7,7 @@
   --border: rgba(0, 0, 0, 0.1);
   --font-body: "Circular Std", "Avenir Next", "Helvetica Neue", "Segoe UI", sans-serif;
   --font-display: "Romie Trial", "Didot", "Bodoni 72", "Iowan Old Style", serif;
-  --page-width: 1512px;
+  --page-width: 912px;
   --page-padding: clamp(1.25rem, 7vw, 18.75rem);
 }
 
@@ -51,7 +51,7 @@ h3 {
 }
 
 .site-band {
-  width: min(100%, var(--page-width));
+  width: min(100%, calc(var(--page-width) + (var(--page-padding) * 2)));
   margin-inline: auto;
   padding-inline: var(--page-padding);
 }

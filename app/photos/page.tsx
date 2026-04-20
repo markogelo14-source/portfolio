@@ -19,7 +19,7 @@ export default function PhotosPage() {
       <section className="site-band photos-page">
         <div className="photos-intro column">
           <h1 className="identity-name">Photos</h1>
-          <p className="photos-copy">Here is a gallery of images which I like the best</p>
+          <p className="photos-copy">Little bit of this, little bit of that...</p>
         </div>
 
         <PhotoGallery photos={photos} />

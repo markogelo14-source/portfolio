@@ -488,6 +488,171 @@ h3 {
   font-weight: 400;
 }
 
+.photos-page,
+.photos-intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.photos-page {
+  gap: 3.75rem;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.photos-intro {
+  gap: 0.625rem;
+  max-width: 25.4375rem;
+}
+
+.photos-copy,
+.photo-lightbox-caption {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.photo-grid {
+  display: grid;
+  width: min(calc(100vw - 2rem), 73.875rem);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-inline: 50%;
+  transform: translateX(-50%);
+}
+
+.photo-tile {
+  aspect-ratio: 29 / 40;
+}
+
+.photo-tile {
+  display: block;
+  grid-column: var(--photo-column, auto);
+  grid-row: var(--photo-row, auto);
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.photo-tile:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+
+.photo-surface {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: var(--photo-image), var(--photo-fill);
+  background-position: var(--photo-position), center;
+  background-repeat: no-repeat;
+  background-size: cover, cover;
+  transition:
+    filter 180ms ease,
+    transform 220ms ease;
+}
+
+.photo-tile:hover .photo-surface {
+  filter: saturate(1.05) contrast(1.02);
+  transform: scale(1.018);
+}
+
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: minmax(3.5rem, 1fr) minmax(0, 72rem) minmax(3.5rem, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+}
+
+.photo-lightbox-figure {
+  display: flex;
+  grid-column: 2;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  margin: 0;
+}
+
+.photo-lightbox-image {
+  width: 100%;
+  height: min(78vh, 52rem);
+  background-image: var(--photo-image), var(--photo-fill);
+  background-position: var(--photo-position), center;
+  background-repeat: no-repeat;
+  background-size: contain, cover;
+}
+
+.photo-lightbox-caption {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.photo-lightbox-close,
+.photo-lightbox-arrow {
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.photo-lightbox-close:hover,
+.photo-lightbox-arrow:hover,
+.photo-lightbox-close:focus-visible,
+.photo-lightbox-arrow:focus-visible {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.photo-lightbox-close:focus-visible,
+.photo-lightbox-arrow:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 4px;
+}
+
+.photo-lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.photo-lightbox-arrow-previous {
+  grid-column: 1;
+  justify-self: center;
+}
+
+.photo-lightbox-arrow-next {
+  grid-column: 3;
+  justify-self: center;
+}
+
 @media (max-width: 980px) {
   .site-footer-shell {
     align-items: flex-start;
@@ -500,6 +665,15 @@ h3 {
 
   .meta-grid {
     grid-template-columns: 1fr;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .photo-tile {
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 
@@ -531,6 +705,50 @@ h3 {
   .visual-surface-large,
   .visual-surface-gallery {
     min-height: 18rem;
+  }
+
+  .photos-page {
+    gap: 2.5rem;
+    padding-top: 3rem;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .photo-tile {
+    aspect-ratio: 4 / 5;
+  }
+
+  .photo-lightbox {
+    grid-template-columns: 1fr;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .photo-lightbox-figure {
+    grid-column: 1;
+  }
+
+  .photo-lightbox-image {
+    height: 72vh;
+  }
+
+  .photo-lightbox-caption {
+    padding-bottom: 3.25rem;
+  }
+
+  .photo-lightbox-arrow {
+    position: fixed;
+    bottom: 1rem;
+  }
+
+  .photo-lightbox-arrow-previous {
+    left: 1rem;
+  }
+
+  .photo-lightbox-arrow-next {
+    right: 1rem;
   }
 
   .underline {

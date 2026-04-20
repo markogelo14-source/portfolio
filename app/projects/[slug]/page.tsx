@@ -88,7 +88,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           {project.meta.map((item) => (
             <article className="meta-card" key={item.label}>
               <h3 className="meta-card-label">{item.label}</h3>
-              <p className="meta-card-value">{item.value}</p>
+              {item.href ? (
+                <a
+                  className="meta-card-link meta-card-value"
+                  href={item.href}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {item.value}
+                </a>
+              ) : (
+                <p className="meta-card-value">{item.value}</p>
+              )}
             </article>
           ))}
         </section>

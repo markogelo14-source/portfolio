@@ -1,6 +1,7 @@
 type ProjectMeta = {
   label: string;
   value: string;
+  href?: string;
 };
 
 type ProjectPanel = {
@@ -57,6 +58,7 @@ export const projects: readonly Project[] = [
       {
         label: "Website",
         value: "www.sofascore.com",
+        href: "https://www.sofascore.com",
       },
     ],
     gallery: [
@@ -120,6 +122,7 @@ export const projects: readonly Project[] = [
       {
         label: "Website",
         value: "www.dobartek.hr",
+        href: "https://www.dobartek.hr",
       },
     ],
     gallery: [
@@ -167,22 +170,23 @@ export const projects: readonly Project[] = [
     detailIntro:
       "Designing a focused health dashboard that helps people read trends instead of getting lost in charts.",
     detailDescription:
-      "A calm data experience for nutrition tracking, with emphasis on daily patterns, gentle guidance, and high-legibility reporting for repeated use.",
+      "Nutrivision is a tool that simplifies meal plan tracking and management for users. It helps nutritionists keep all their clients organized in one place, while clients can access their plans and communications easily.",
     detailColor: "#277996",
     detailAccent: "#4497b4",
     detailGlow: "rgba(199, 240, 255, 0.5)",
     meta: [
       {
         label: "Services",
-        value: "Dashboard UX / Product Design / Information Architecture",
+        value: "Art Direction / User Interface Design / User Experiance Design / Design Systems",
       },
       {
         label: "Project type",
-        value: "Concept-driven product case study with system-level exploration",
+        value: "Sole designer & Project has been done as a part of team @ Blank",
       },
       {
         label: "Website",
-        value: "Private concept",
+        value: "Health upp",
+        href: "https://health-upp.com",
       },
     ],
     gallery: [
@@ -230,22 +234,23 @@ export const projects: readonly Project[] = [
     detailIntro:
       "Refreshing a hosting dashboard to feel faster, lighter, and more trustworthy for technical and non-technical users alike.",
     detailDescription:
-      "A UI refresh centered on clearer task grouping, simplified status communication, and a brighter interface language that lowers friction in high-frequency admin workflows.",
+      "Easily manage all your WordPress websites in intuitive, user-friendly interface designed to maximize your productivity, minimize friction and help you succeed.",
     detailColor: "#5faec4",
     detailAccent: "#7bc7db",
     detailGlow: "rgba(220, 248, 255, 0.54)",
     meta: [
       {
         label: "Services",
-        value: "Product Design / UI Refresh / Hosting Dashboard UX",
+        value: "Market Research / Art Direction / Product Design / Design System",
       },
       {
         label: "Project type",
-        value: "B2B dashboard modernization with attention to trust signals",
+        value: "Freelance project",
       },
       {
         label: "Website",
-        value: "Private client work",
+        value: "Rocket",
+        href: "https://rocket.net/",
       },
     ],
     gallery: [

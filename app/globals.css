@@ -343,6 +343,20 @@ h3 {
   color: var(--text);
 }
 
+.meta-card-link {
+  display: inline-block;
+  width: fit-content;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: color 180ms ease-out;
+}
+
+.meta-card-link:hover,
+.meta-card-link:focus-visible {
+  color: var(--muted);
+}
+
 .visual-surface,
 .next-project-card {
   background: linear-gradient(140deg, var(--surface-base), var(--surface-accent));

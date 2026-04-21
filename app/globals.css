@@ -8,6 +8,9 @@
   --font-display: "Romie Trial", "Didot", "Bodoni 72", "Iowan Old Style", serif;
   --page-width: 912px;
   --page-padding: clamp(1.25rem, 7vw, 18.75rem);
+  --page-transition:
+    opacity 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -16,6 +19,14 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+html.page-transition-entering {
+  scroll-behavior: auto;
+}
+
+html.page-transition-entering body {
+  overflow-anchor: none;
 }
 
 body {
@@ -48,6 +59,56 @@ h3 {
   flex-direction: column;
   min-height: 100vh;
   background: var(--canvas);
+}
+
+body > .portfolio-page {
+  opacity: 1;
+  filter: blur(0);
+  transition: var(--page-transition);
+  will-change: opacity, filter;
+}
+
+html.page-transition-entering body > .portfolio-page {
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+.page-transition-snapshot {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  background: var(--canvas);
+  opacity: 1;
+  filter: blur(0);
+  pointer-events: none;
+  transition: var(--page-transition);
+  will-change: opacity, filter;
+}
+
+.page-transition-snapshot-leaving {
+  opacity: 0;
+  filter: blur(6px);
+}
+
+.page-transition-snapshot-inner {
+  position: absolute;
+  left: 0;
+  width: 100%;
+}
+
+.page-transition-snapshot .portfolio-page {
+  transition: none;
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body > .portfolio-page,
+  .page-transition-snapshot {
+    transition: none;
+    filter: none;
+  }
 }
 
 .site-chrome {
@@ -271,7 +332,7 @@ h3 {
 .gallery-stack {
   display: flex;
   flex-direction: column;
-  gap: 3.75rem;
+  gap: 1rem;
   padding-bottom: 5rem;
 }
 
@@ -365,6 +426,28 @@ h3 {
 .visual-surface {
   width: 100%;
   box-shadow: inset 0 -10px 40px rgba(255, 255, 255, 0.2);
+}
+
+.project-image-frame,
+.project-gallery-pair {
+  width: 100%;
+  overflow: hidden;
+}
+
+.project-gallery-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1rem;
+}
+
+.project-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.project-video {
+  background: #000000;
 }
 
 .visual-surface-large,
@@ -705,6 +788,11 @@ h3 {
   .visual-surface-large,
   .visual-surface-gallery {
     min-height: 18rem;
+  }
+
+  .project-gallery-pair {
+    grid-template-columns: 1fr;
+    row-gap: 1rem;
   }
 
   .photos-page {

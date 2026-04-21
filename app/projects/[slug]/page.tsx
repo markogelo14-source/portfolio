@@ -1,10 +1,16 @@
+/* eslint-disable @next/next/no-img-element -- Project images are folder-driven and should keep their native aspect ratio. */
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SiteFooter, SiteNav } from "../../components";
+import { PageTransitionLink } from "../../page-transition-link";
 import { getNextProject, getProjectBySlug, projects } from "../../site-data";
+import {
+  getProjectGalleryItems,
+  getProjectHeroImage,
+  type ProjectGalleryImage,
+} from "../project-gallery-data";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -18,6 +24,25 @@ function getSurfaceStyle(base: string, accent: string, glow: string) {
     "--surface-accent": accent,
     "--surface-glow": glow,
   } as CSSProperties;
+}
+
+function ProjectMedia({ media }: { media: ProjectGalleryImage }) {
+  if (media.kind === "video") {
+    return (
+      <video
+        aria-label={media.alt}
+        autoPlay
+        className="project-image project-video"
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        src={media.src}
+      />
+    );
+  }
+
+  return <img alt={media.alt} className="project-image" src={media.src} />;
 }
 
 export function generateStaticParams() {
@@ -55,6 +80,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const nextProject = getNextProject(project.slug);
+  const heroImage = getProjectHeroImage(project.slug, project.name);
+  const galleryItems = getProjectGalleryItems(project.slug, project.name);
 
   return (
     <main className="portfolio-page">
@@ -73,11 +100,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <h1 className="detail-intro">{project.detailIntro}</h1>
         </div>
 
-        <section
-          aria-label={`${project.name} feature visual`}
-          className="visual-surface visual-surface-large"
-          style={getSurfaceStyle(project.detailColor, project.detailAccent, project.detailGlow)}
-        />
+        {heroImage ? (
+          <div className="project-image-frame project-hero-image">
+            <ProjectMedia media={heroImage} />
+          </div>
+        ) : (
+          <section
+            aria-label={`${project.name} feature visual`}
+            className="visual-surface visual-surface-large"
+            style={getSurfaceStyle(project.detailColor, project.detailAccent, project.detailGlow)}
+          />
+        )}
 
         <section className="project-copy-block column">
           <h2 className="section-title">Project info</h2>
@@ -105,18 +138,32 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </section>
 
         <div className="gallery-stack">
-          {project.gallery.map((panel) => (
-            <section
-              aria-label={panel.label}
-              className="visual-surface visual-surface-gallery"
-              key={panel.label}
-              style={getSurfaceStyle(panel.base, panel.accent, panel.glow)}
-            />
-          ))}
+          {galleryItems.length > 0
+            ? galleryItems.map((item) =>
+                item.type === "pair" ? (
+                  <div className="project-gallery-pair" key={item.id}>
+                    {item.images.map((image) => (
+                      <ProjectMedia key={image.id} media={image} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="project-image-frame project-gallery-image" key={item.id}>
+                    <ProjectMedia media={item.image} />
+                  </div>
+                ),
+              )
+            : project.gallery.map((panel) => (
+                <section
+                  aria-label={panel.label}
+                  className="visual-surface visual-surface-gallery"
+                  key={panel.label}
+                  style={getSurfaceStyle(panel.base, panel.accent, panel.glow)}
+                />
+              ))}
         </div>
 
         {nextProject ? (
-          <Link
+          <PageTransitionLink
             className="next-project-card"
             href={`/projects/${nextProject.slug}`}
             style={getSurfaceStyle(
@@ -127,7 +174,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           >
             <h2 className="next-project-title">{nextProject.name}</h2>
             <p className="next-project-label">Next project</p>
-          </Link>
+          </PageTransitionLink>
         ) : null}
       </section>
 

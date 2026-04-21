@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
-import Link from "next/link";
 
 import { SiteFooter, SiteNav } from "./components";
+import { PageTransitionLink } from "./page-transition-link";
 import { projects } from "./site-data";
 
 function getProjectCardStyle(project: (typeof projects)[number]) {
@@ -28,7 +28,7 @@ export default function Home() {
 
       <section aria-label="Selected work" className="site-band project-stack" id="work">
         {projects.map((project) => (
-          <Link
+          <PageTransitionLink
             className="project-card"
             href={`/projects/${project.slug}`}
             key={project.slug}
@@ -44,7 +44,7 @@ export default function Home() {
             </div>
 
             <p className="project-summary">{project.cardSummary}</p>
-          </Link>
+          </PageTransitionLink>
         ))}
       </section>
 

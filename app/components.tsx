@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+
+import { PageTransitionLink } from "./page-transition-link";
 
 type SiteNavProps = {
   breadcrumb?: {
@@ -27,9 +28,9 @@ function SmartLink({ className, href, children }: SmartLinkProps) {
   }
 
   return (
-    <Link className={className} href={href}>
+    <PageTransitionLink className={className} href={href}>
       {children}
-    </Link>
+    </PageTransitionLink>
   );
 }
 
@@ -39,23 +40,20 @@ export function SiteNav({ breadcrumb, currentLabel = "Work" }: SiteNavProps) {
       <header className="site-chrome site-header">
         <div className="site-band">
           <div className="site-nav-shell">
-            <Link className="back-link" href={breadcrumb.backHref ?? breadcrumb.href}>
+            <PageTransitionLink className="back-link" href={breadcrumb.backHref ?? breadcrumb.href}>
               <span aria-hidden="true">{"<"}</span>
               <span>Back</span>
-            </Link>
+            </PageTransitionLink>
 
             <nav className="nav-links" aria-label="Primary">
               <span className="nav-breadcrumb">
-                <Link className="nav-link nav-link-muted" href={breadcrumb.href}>
+                <PageTransitionLink className="nav-link nav-link-muted" href={breadcrumb.href}>
                   {breadcrumb.label}
-                </Link>
+                </PageTransitionLink>
                 <span className="nav-slash">/</span>
                 <span className="nav-link nav-link-current">{breadcrumb.current}</span>
               </span>
 
-              <SmartLink className="nav-link nav-link-muted" href="/#contact">
-                Contact
-              </SmartLink>
               <SmartLink className="nav-link nav-link-muted" href="/about">
                 About
               </SmartLink>
@@ -64,6 +62,9 @@ export function SiteNav({ breadcrumb, currentLabel = "Work" }: SiteNavProps) {
               </SmartLink>
               <SmartLink className="nav-link nav-link-muted" href="/photos">
                 Photos
+              </SmartLink>
+              <SmartLink className="nav-link nav-link-muted" href="mailto:markogelo14@gmail.com">
+                Contact
               </SmartLink>
             </nav>
           </div>
@@ -76,9 +77,9 @@ export function SiteNav({ breadcrumb, currentLabel = "Work" }: SiteNavProps) {
     <header className="site-chrome site-header">
       <div className="site-band">
         <div className="site-nav-shell">
-          <Link aria-label="Marko Gelo home" className="brand-mark" href="/">
+          <PageTransitionLink aria-label="Marko Gelo home" className="brand-mark" href="/">
             <span className="brand-orb" />
-          </Link>
+          </PageTransitionLink>
 
           <nav className="nav-links" aria-label="Primary">
             <SmartLink
@@ -107,7 +108,7 @@ export function SiteNav({ breadcrumb, currentLabel = "Work" }: SiteNavProps) {
             </SmartLink>
             <SmartLink
               className={`nav-link ${currentLabel === "Contact" ? "nav-link-current" : "nav-link-muted"}`}
-              href="/#contact"
+              href="mailto:markogelo14@gmail.com"
             >
               Contact
             </SmartLink>

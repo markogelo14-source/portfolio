@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
+import { createPortal } from "react-dom";
 
 import type { PhotoItem } from "./photo-data";
 
@@ -108,6 +109,67 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
     return null;
   }
 
+  const lightbox =
+    activePhoto && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            aria-label={`${activePhoto.title} photo viewer`}
+            aria-modal="true"
+            className="photo-lightbox"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                closePhoto();
+              }
+            }}
+            role="dialog"
+          >
+            <button
+              aria-label="Close photo"
+              className="photo-lightbox-close"
+              onClick={closePhoto}
+              type="button"
+            >
+              <span aria-hidden="true">x</span>
+            </button>
+
+            <button
+              aria-label="Previous photo"
+              className="photo-lightbox-arrow photo-lightbox-arrow-previous"
+              onClick={showPreviousPhoto}
+              type="button"
+            >
+              <span aria-hidden="true">{"<"}</span>
+            </button>
+
+            <figure className="photo-lightbox-figure">
+              <div
+                aria-label={activePhoto.alt}
+                className="photo-lightbox-image"
+                role="img"
+                style={getPhotoStyle(activePhoto, activeIndex ?? 0)}
+              />
+
+              <figcaption className="photo-lightbox-caption">
+                <span>{activePhoto.title}</span>
+                <span>
+                  {(activeIndex ?? 0) + 1} / {photos.length}
+                </span>
+              </figcaption>
+            </figure>
+
+            <button
+              aria-label="Next photo"
+              className="photo-lightbox-arrow photo-lightbox-arrow-next"
+              onClick={showNextPhoto}
+              type="button"
+            >
+              <span aria-hidden="true">{">"}</span>
+            </button>
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
     <>
       <div aria-label="Photo gallery" className="photo-grid">
@@ -129,62 +191,7 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
         ))}
       </div>
 
-      {activePhoto ? (
-        <div
-          aria-label={`${activePhoto.title} photo viewer`}
-          aria-modal="true"
-          className="photo-lightbox"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              closePhoto();
-            }
-          }}
-          role="dialog"
-        >
-          <button
-            aria-label="Close photo"
-            className="photo-lightbox-close"
-            onClick={closePhoto}
-            type="button"
-          >
-            <span aria-hidden="true">x</span>
-          </button>
-
-          <button
-            aria-label="Previous photo"
-            className="photo-lightbox-arrow photo-lightbox-arrow-previous"
-            onClick={showPreviousPhoto}
-            type="button"
-          >
-            <span aria-hidden="true">{"<"}</span>
-          </button>
-
-          <figure className="photo-lightbox-figure">
-            <div
-              aria-label={activePhoto.alt}
-              className="photo-lightbox-image"
-              role="img"
-              style={getPhotoStyle(activePhoto, activeIndex ?? 0)}
-            />
-
-            <figcaption className="photo-lightbox-caption">
-              <span>{activePhoto.title}</span>
-              <span>
-                {(activeIndex ?? 0) + 1} / {photos.length}
-              </span>
-            </figcaption>
-          </figure>
-
-          <button
-            aria-label="Next photo"
-            className="photo-lightbox-arrow photo-lightbox-arrow-next"
-            onClick={showNextPhoto}
-            type="button"
-          >
-            <span aria-hidden="true">{">"}</span>
-          </button>
-        </div>
-      ) : null}
+      {lightbox}
     </>
   );
 }

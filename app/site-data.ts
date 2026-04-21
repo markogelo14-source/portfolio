@@ -298,22 +298,23 @@ export const projects: readonly Project[] = [
     detailIntro:
       "Building a premium commerce direction that balances technical storytelling with a restrained, luxury pace.",
     detailDescription:
-      "An ecommerce concept for a performance eyewear brand, using contrast, motion cues, and editorial product framing to make the technology feel desirable instead of clinical.",
+      "Hyperlight Optics utilizes innovative lens technology that enhances visual clarity, reduces eye strain, and provides superior protection against digital screen exposure. Their lenses are engineered to improve overall eye health while offering a comfortable and clear viewing experience.",
     detailColor: "#1f1f1f",
     detailAccent: "#353535",
     detailGlow: "rgba(255, 255, 255, 0.18)",
     meta: [
       {
         label: "Services",
-        value: "Brand Expression / Ecommerce UX / Visual Direction",
+        value: "Art Direction / User Interface Design / User Experiance Design / Design System",
       },
       {
         label: "Project type",
-        value: "Premium retail concept focused on storytelling and conversion",
+        value: "Freelance project, collaboration with partner Igor Carli",
       },
       {
         label: "Website",
-        value: "Concept exploration",
+        value: "Hyperlight",
+        href: "https://hyperlightoptics.com/",
       },
     ],
     gallery: [

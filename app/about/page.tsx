@@ -1,36 +1,46 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "../placeholder-page";
+import { SiteFooter, SiteNav } from "../components";
 
 export const metadata: Metadata = {
   title: "About | Marko Gelo",
-  description: "Placeholder page for Marko Gelo's about section.",
+  description: "A short introduction to Marko Gelo's design background and approach.",
 };
 
 export default function AboutPage() {
   return (
-    <PlaceholderPage
-      accent="#d59d42"
-      eyebrow="Profile / Background / Approach"
-      intro="A fuller introduction is on the way, with more context around experience, process, and the way I like to work."
-      note="This route is intentionally lightweight for now so the navigation is settled before the final page design is ready."
-      panels={[
-        {
-          title: "Background",
-          description: "A short personal story, career path, and the kinds of teams and products I enjoy working on.",
-        },
-        {
-          title: "Approach",
-          description: "How I think about systems, collaboration, and making complex products feel calm and clear.",
-        },
-        {
-          title: "Experience",
-          description: "Selected roles, partnerships, and a quick snapshot of skills that support the project work.",
-        },
-      ]}
-      softAccent="#f4ece0"
-      tags={["Story", "Experience", "Process"]}
-      title="About"
-    />
+    <main className="portfolio-page">
+      <SiteNav currentLabel="About" />
+
+      <section className="site-band about-page">
+        <div className="about-heading">
+          <p className="identity-name">About</p>
+          <h1 className="about-title">
+            I am Marko, a product designer who likes clean systems, useful details, and a little room to experiment.
+          </h1>
+        </div>
+
+        <div className="about-copy">
+          <p>
+            Currently designing at Sofascore, where I work on digital products that make dense sports data feel faster,
+            clearer, and easier to use.
+          </p>
+          <p>
+            Before that, I worked across mobile apps, dashboards, websites, and design systems for teams that needed
+            thoughtful interfaces with a practical point of view.
+          </p>
+          <p>
+            Outside of product work, I like photography, visual experiments, and small coded ideas that help me test how
+            something should feel before it becomes too polished.
+          </p>
+
+          <a className="about-link" href="mailto:markogelo14@gmail.com">
+            markogelo14@gmail.com
+          </a>
+        </div>
+      </section>
+
+      <SiteFooter />
+    </main>
   );
 }

@@ -1,6 +1,8 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
 
+import photoTitlesData from "../../public/photos/photo-titles.json";
+
 export type PhotoItem = {
   id: string;
   title: string;
@@ -16,6 +18,7 @@ const naturalSort = new Intl.Collator("en", {
   numeric: true,
   sensitivity: "base",
 });
+const photoTitles: Record<string, string> = photoTitlesData;
 
 function getPhotoTitle(fileName: string) {
   const title = fileName
@@ -45,7 +48,7 @@ export function getPhotos() {
   }
 
   return fileNames.map((fileName, index): PhotoItem => {
-    const title = getPhotoTitle(fileName);
+    const title = photoTitles[fileName]?.trim() || getPhotoTitle(fileName);
 
     return {
       id: `${index}-${fileName}`,

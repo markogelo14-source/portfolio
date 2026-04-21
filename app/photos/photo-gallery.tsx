@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 
-import { ChevronLeft, ChevronRight, CloseIcon } from "../icons";
 import type { PhotoItem } from "./photo-data";
 
 type PhotoGalleryProps = {
@@ -130,7 +129,7 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
               onClick={closePhoto}
               type="button"
             >
-              <CloseIcon />
+              <span aria-hidden="true">x</span>
             </button>
 
             <button
@@ -139,7 +138,7 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
               onClick={showPreviousPhoto}
               type="button"
             >
-              <ChevronLeft />
+              <span aria-hidden="true">{"<"}</span>
             </button>
 
             <figure className="photo-lightbox-figure">
@@ -164,7 +163,7 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
               onClick={showNextPhoto}
               type="button"
             >
-              <ChevronRight />
+              <span aria-hidden="true">{">"}</span>
             </button>
           </div>,
           document.body,

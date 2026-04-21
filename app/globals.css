@@ -572,9 +572,62 @@ html.page-transition-entering body > .portfolio-page {
 }
 
 .photos-page,
-.photos-intro {
+.photos-intro,
+.about-heading,
+.about-copy {
   display: flex;
   flex-direction: column;
+}
+
+.about-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 25.4375rem);
+  align-items: start;
+  gap: 5rem;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.about-heading {
+  gap: 1rem;
+  max-width: 32rem;
+}
+
+.about-title {
+  max-width: 32rem;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.about-copy {
+  gap: 1.25rem;
+  padding-top: 2.5rem;
+}
+
+.about-copy,
+.about-link {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.25rem;
+  letter-spacing: 0;
+}
+
+.about-link {
+  width: fit-content;
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: color 180ms ease-out;
+}
+
+.about-link:hover,
+.about-link:focus-visible {
+  color: var(--text);
 }
 
 .photos-page {
@@ -798,6 +851,20 @@ html.page-transition-entering body > .portfolio-page {
   .photos-page {
     gap: 2.5rem;
     padding-top: 3rem;
+  }
+
+  .about-page {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding-top: 3rem;
+  }
+
+  .about-title {
+    font-size: 2.25rem;
+  }
+
+  .about-copy {
+    padding-top: 0;
   }
 
   .photo-grid {

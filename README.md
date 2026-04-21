@@ -28,6 +28,7 @@ This repository is a clean Next.js starter for your new portfolio. It already in
 ## Where to Edit
 
 - `app/site-data.ts`: your name, contact links, featured work, timeline, and copy
+- `public/photos/photo-titles.json`: photo titles shown in the Photos gallery
 - `app/page.tsx`: homepage section structure
 - `app/globals.css`: colors, layout, spacing, and the overall visual system
 

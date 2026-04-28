@@ -10,7 +10,7 @@ export type ProjectGalleryImage = {
   src: string;
 };
 
-export type ProjectGalleryItem =
+type ProjectGalleryItem =
   | {
       type: "image";
       id: string;
@@ -38,23 +38,6 @@ const naturalSort = new Intl.Collator("en", {
   numeric: true,
   sensitivity: "base",
 });
-
-function getProjectImageFileNames(projectSlug: string) {
-  const galleryDirectory = path.join(projectImageDirectory, projectSlug);
-  let fileNames: string[] = [];
-
-  try {
-    fileNames = readdirSync(galleryDirectory, { withFileTypes: true })
-      .filter((file) => file.isFile())
-      .map((file) => file.name)
-      .filter((fileName) => supportedExtensions.has(path.extname(fileName).toLowerCase()))
-      .sort((first, second) => naturalSort.compare(first, second));
-  } catch {
-    fileNames = [];
-  }
-
-  return fileNames;
-}
 
 function getProjectImageTitle(fileName: string) {
   const title = fileName
@@ -84,26 +67,21 @@ function getProjectMediaKind(fileName: string) {
   return supportedVideoExtensions.has(path.extname(fileName).toLowerCase()) ? "video" : "image";
 }
 
-function getProjectHeroFileName(fileNames: string[]) {
-  const imageFileNames = fileNames.filter(isSupportedImage);
-
-  return imageFileNames.find(isProjectHeroImage) ?? imageFileNames[0] ?? null;
-}
-
 function toProjectImage(
   projectSlug: string,
   projectName: string,
   fileName: string,
   index: number,
 ): ProjectGalleryImage {
+  const kind = getProjectMediaKind(fileName);
   const title = getProjectImageTitle(fileName);
 
   return {
     fileName,
     id: `${projectSlug}-${index}-${fileName}`,
-    kind: getProjectMediaKind(fileName),
+    kind,
     title,
-    alt: `${projectName} project ${getProjectMediaKind(fileName)}: ${title}.`,
+    alt: `${projectName} project ${kind}: ${title}.`,
     src: `/projects/${encodeURIComponent(projectSlug)}/${encodeURIComponent(fileName)}`,
   };
 }
@@ -112,72 +90,70 @@ function getNormalizedFileName(fileName: string) {
   return fileName.toLowerCase();
 }
 
-export function getProjectHeroImage(projectSlug: string, projectName: string) {
-  const heroImage = getProjectHeroFileName(getProjectImageFileNames(projectSlug));
-
-  if (!heroImage) {
-    return null;
+function getProjectFileNames(projectSlug: string) {
+  try {
+    return readdirSync(path.join(projectImageDirectory, projectSlug), { withFileTypes: true })
+      .filter((file) => file.isFile())
+      .map((file) => file.name)
+      .filter((fileName) => supportedExtensions.has(path.extname(fileName).toLowerCase()))
+      .sort((first, second) => naturalSort.compare(first, second));
+  } catch {
+    return [];
   }
-
-  return toProjectImage(projectSlug, projectName, heroImage, 0);
 }
 
-export function getProjectGalleryImages(projectSlug: string, projectName: string) {
-  const projectFileNames = getProjectImageFileNames(projectSlug);
-  const heroImage = getProjectHeroFileName(projectFileNames);
-  const fileNames = projectFileNames.filter((fileName) => fileName !== heroImage);
-
-  return fileNames.map((fileName, index): ProjectGalleryImage => {
-    return toProjectImage(projectSlug, projectName, fileName, index);
-  });
-}
-
-export function getProjectGalleryItems(projectSlug: string, projectName: string) {
-  const images = getProjectGalleryImages(projectSlug, projectName);
+export function getProjectGallery(projectSlug: string, projectName: string) {
+  const fileNames = getProjectFileNames(projectSlug);
+  const heroFileName =
+    fileNames.filter(isSupportedImage).find(isProjectHeroImage) ??
+    fileNames.find(isSupportedImage) ??
+    null;
+  const heroImage = heroFileName ? toProjectImage(projectSlug, projectName, heroFileName, 0) : null;
+  const images = fileNames
+    .filter((fileName) => fileName !== heroFileName)
+    .map((fileName, index) => toProjectImage(projectSlug, projectName, fileName, index));
   const pairDefinitions = projectImagePairs[projectSlug] ?? [];
+  const imagesByFileName = new Map(
+    images.map((image) => [getNormalizedFileName(image.fileName), image]),
+  );
   const usedFileNames = new Set<string>();
+  const galleryItems: ProjectGalleryItem[] = [];
 
-  return images.reduce<ProjectGalleryItem[]>((items, image) => {
+  for (const image of images) {
     const normalizedFileName = getNormalizedFileName(image.fileName);
 
     if (usedFileNames.has(normalizedFileName)) {
-      return items;
+      continue;
     }
 
     const pairDefinition = pairDefinitions.find(
       ([firstFileName]) => getNormalizedFileName(firstFileName) === normalizedFileName,
     );
+    const pairImage = pairDefinition
+      ? imagesByFileName.get(getNormalizedFileName(pairDefinition[1]))
+      : null;
 
-    if (pairDefinition) {
-      const pairImage = images.find(
-        (candidate) =>
-          getNormalizedFileName(candidate.fileName) === getNormalizedFileName(pairDefinition[1]),
-      );
-
-      if (pairImage) {
-        usedFileNames.add(normalizedFileName);
-        usedFileNames.add(getNormalizedFileName(pairImage.fileName));
-
-        return [
-          ...items,
-          {
-            type: "pair",
-            id: `${image.id}-${pairImage.id}`,
-            images: [image, pairImage],
-          },
-        ];
-      }
+    if (pairImage) {
+      usedFileNames.add(normalizedFileName);
+      usedFileNames.add(getNormalizedFileName(pairImage.fileName));
+      galleryItems.push({
+        type: "pair",
+        id: `${image.id}-${pairImage.id}`,
+        images: [image, pairImage],
+      });
+      continue;
     }
 
     usedFileNames.add(normalizedFileName);
+    galleryItems.push({
+      type: "image",
+      id: image.id,
+      image,
+    });
+  }
 
-    return [
-      ...items,
-      {
-        type: "image",
-        id: image.id,
-        image,
-      },
-    ];
-  }, []);
+  return {
+    galleryItems,
+    heroImage,
+  };
 }

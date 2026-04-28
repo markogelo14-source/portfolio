@@ -5,28 +5,6 @@ type IconProps = SVGProps<SVGSVGElement> & {
   title?: string;
 };
 
-export function ArrowLeftIcon({ size = 16, title, ...props }: IconProps) {
-  return (
-    <svg
-      aria-hidden={title ? undefined : true}
-      fill="none"
-      height={size}
-      role={title ? "img" : undefined}
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-      width={size}
-      {...props}
-    >
-      {title ? <title>{title}</title> : null}
-      <path d="M19 12H5" />
-      <path d="m12 19-7-7 7-7" />
-    </svg>
-  );
-}
-
 export function ChevronLeft({ size = 20, title, ...props }: IconProps) {
   return (
     <svg

@@ -5,12 +5,11 @@ import { notFound } from "next/navigation";
 
 import { SiteFooter, SiteNav } from "../../components";
 import { PageTransitionLink } from "../../page-transition-link";
-import { getNextProject, getProjectBySlug, projects } from "../../site-data";
 import {
-  getProjectGalleryItems,
-  getProjectHeroImage,
+  getProjectGallery,
   type ProjectGalleryImage,
 } from "../project-gallery-data";
+import { getNextProject, getProjectBySlug, projects } from "../project-data";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -80,8 +79,20 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const nextProject = getNextProject(project.slug);
-  const heroImage = getProjectHeroImage(project.slug, project.name);
-  const galleryItems = getProjectGalleryItems(project.slug, project.name);
+  const { galleryItems, heroImage } = getProjectGallery(project.slug, project.name);
+  const websiteMeta = project.meta.find((item) => item.href);
+  const detailItems = [
+    {
+      label: "Project",
+      value: project.kicker,
+    },
+    ...project.meta
+      .filter((item) => !item.href)
+      .map((item) => ({
+        label: item.label,
+        value: item.value,
+      })),
+  ];
 
   return (
     <main className="portfolio-page">
@@ -94,7 +105,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         }}
       />
 
-      <section className="site-band project-detail-stack">
+      <section className="site-band project-detail-band project-detail-stack">
         <div className="detail-identity column">
           <p className="identity-name">{project.name}</p>
           <h1 className="detail-intro">{project.detailIntro}</h1>
@@ -112,29 +123,35 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           />
         )}
 
-        <section className="project-copy-block column">
-          <h2 className="section-title">Project info</h2>
-          <p className="project-body">{project.detailDescription}</p>
-        </section>
+        <section aria-label={`${project.name} project details`} className="project-detail-grid">
+          <div className="project-detail-column">
+            <h2 className="project-section-label">Details</h2>
 
-        <section aria-label={`${project.name} project details`} className="meta-grid">
-          {project.meta.map((item) => (
-            <article className="meta-card" key={item.label}>
-              <h3 className="meta-card-label">{item.label}</h3>
-              {item.href ? (
-                <a
-                  className="meta-card-link meta-card-value"
-                  href={item.href}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {item.value}
-                </a>
-              ) : (
-                <p className="meta-card-value">{item.value}</p>
-              )}
-            </article>
-          ))}
+            <div className="project-detail-list">
+              {detailItems.map((item) => (
+                <p className="project-detail-row" key={item.label}>
+                  <span className="project-detail-row-label">{item.label}:</span>{" "}
+                  <span>{item.value}</span>
+                </p>
+              ))}
+            </div>
+
+            {websiteMeta ? (
+              <a
+                className="project-detail-link"
+                href={websiteMeta.href}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {websiteMeta.value}
+              </a>
+            ) : null}
+          </div>
+
+          <div className="project-detail-column project-detail-copy">
+            <h2 className="project-section-label">Overview</h2>
+            <p className="project-body">{project.detailDescription}</p>
+          </div>
         </section>
 
         <div className="gallery-stack">

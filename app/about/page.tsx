@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SiteFooter, SiteNav } from "../components";
+import { PageHero, SiteFooter, SiteNav } from "../components";
 
 export const metadata: Metadata = {
   title: "About | Marko Gelo",
@@ -12,14 +12,14 @@ export default function AboutPage() {
     <main className="portfolio-page">
       <SiteNav currentLabel="About" />
 
-      <section className="site-band about-page">
-        <div className="about-heading">
-          <p className="identity-name">About</p>
-          <h1 className="about-title">
-            I am Marko, a product designer who likes clean systems, useful details, and a little room to experiment.
-          </h1>
-        </div>
+      <section className="site-band page-hero-band">
+        <PageHero
+          eyebrow={<p className="page-hero-label">About</p>}
+          title="I am Marko, a product designer who likes clean systems, useful details, and a little room to experiment."
+        />
+      </section>
 
+      <section className="site-band about-page-body">
         <div className="about-copy">
           <p>
             Currently designing at Sofascore, where I work on digital products that make dense sports data feel faster,

@@ -163,7 +163,7 @@ export const projects: readonly Project[] = [
     name: "Nutrivision",
     kicker: "Dashboard",
     cardSummary:
-      "Premium eyewear brand's website that showcases advanced technology",
+      "Enabling nutritionists and clients with an intuitive meal calendar dashboard.",
     cardColor: "#0c6887",
     cardAccent: "#2280a2",
     cardGlow: "rgba(140, 225, 255, 0.58)",
@@ -177,7 +177,7 @@ export const projects: readonly Project[] = [
     meta: [
       {
         label: "Services",
-        value: "Art Direction / User Interface Design / User Experiance Design / Design Systems",
+        value: "Art Direction / Product Design / Design System",
       },
       {
         label: "Project type",

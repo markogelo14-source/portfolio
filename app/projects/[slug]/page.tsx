@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { SiteFooter, SiteNav } from "../../components";
+import { PageHero, SiteFooter, SiteNav } from "../../components";
 import { PageTransitionLink } from "../../page-transition-link";
 import {
   getProjectGallery,
@@ -106,10 +106,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       />
 
       <section className="site-band project-detail-band project-detail-stack">
-        <div className="detail-identity column">
-          <p className="identity-name">{project.name}</p>
-          <h1 className="detail-intro">{project.detailIntro}</h1>
-        </div>
+        <PageHero eyebrow={<p className="page-hero-label">{project.name}</p>} title={project.detailIntro} />
 
         {heroImage ? (
           <div className="project-image-frame project-hero-image">

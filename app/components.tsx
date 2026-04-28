@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { ChevronLeft } from "./icons";
 import { PageTransitionLink } from "./page-transition-link";
 
 type SiteNavProps = {
@@ -18,6 +19,11 @@ type SmartLinkProps = {
   children: ReactNode;
 };
 
+type PageHeroProps = {
+  eyebrow: ReactNode;
+  title: ReactNode;
+};
+
 function SmartLink({ className, href, children }: SmartLinkProps) {
   if (href.startsWith("mailto:") || href.startsWith("http")) {
     return (
@@ -34,6 +40,17 @@ function SmartLink({ className, href, children }: SmartLinkProps) {
   );
 }
 
+export function PageHero({ eyebrow, title }: PageHeroProps) {
+  return (
+    <div className="page-hero">
+      <div className="page-hero-copy column">
+        <div className="page-hero-eyebrow">{eyebrow}</div>
+        <h1 className="page-hero-title">{title}</h1>
+      </div>
+    </div>
+  );
+}
+
 export function SiteNav({ breadcrumb, currentLabel = "Work" }: SiteNavProps) {
   if (breadcrumb) {
     return (
@@ -41,7 +58,7 @@ export function SiteNav({ breadcrumb, currentLabel = "Work" }: SiteNavProps) {
         <div className="site-band">
           <div className="site-nav-shell">
             <PageTransitionLink className="back-link" href={breadcrumb.backHref ?? breadcrumb.href}>
-              <span aria-hidden="true">{"<"}</span>
+              <ChevronLeft size={18} />
               <span>Back</span>
             </PageTransitionLink>
 

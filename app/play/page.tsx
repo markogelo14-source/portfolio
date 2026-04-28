@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 
-import { SiteFooter, SiteNav } from "../components";
+import { PageHero, SiteFooter, SiteNav } from "../components";
 
 export const metadata: Metadata = {
   title: "Play | Marko Gelo",
@@ -14,13 +14,10 @@ export default function PlayPage() {
       <SiteNav currentLabel="Play" />
 
       <section className="site-band project-detail-stack">
-        <div className="detail-identity column">
-          <p className="identity-name">Play</p>
-          <h1 className="detail-intro">
-            This page will become a home for smaller ideas, playful prototypes, and things that sit outside the polished
-            case-study format.
-          </h1>
-        </div>
+        <PageHero
+          eyebrow={<p className="page-hero-label">Play</p>}
+          title="This page will become a home for smaller ideas, playful prototypes, and things that sit outside the polished case-study format."
+        />
 
         <section
           aria-label="Play placeholder"

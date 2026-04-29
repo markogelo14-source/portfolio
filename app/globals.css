@@ -630,8 +630,8 @@ html.page-transition-entering body > .portfolio-page {
 
 .playground-page {
   position: relative;
-  height: 100vh;
   min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
 }
 
@@ -639,7 +639,8 @@ html.page-transition-entering body > .portfolio-page {
   position: fixed;
   inset: 0 0 auto;
   z-index: 50;
-  background: var(--canvas);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
 }
 
 .playground-stage,
@@ -652,14 +653,14 @@ html.page-transition-entering body > .portfolio-page {
 .playground-stage {
   position: relative;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  align-items: flex-end;
-  justify-content: flex-start;
   cursor: grab;
   touch-action: none;
   overscroll-behavior: none;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfaf6 100%);
+  isolation: isolate;
 }
 
 .playground-stage::before,
@@ -672,19 +673,17 @@ html.page-transition-entering body > .portfolio-page {
 
 .playground-stage::before {
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-position: center;
-  background-size: 7.5rem 7.5rem;
-  opacity: 0.34;
+  background-size: 7rem 7rem;
+  opacity: 0.28;
 }
 
 .playground-stage::after {
   background:
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.36), transparent 0 48%),
-    radial-gradient(circle at 12% 28%, rgba(255, 255, 255, 0.34), transparent 0 18%);
-  mix-blend-mode: screen;
-  opacity: 0.6;
+    radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.88), transparent 44%),
+    radial-gradient(circle at 4% 100%, rgba(243, 235, 221, 0.45), transparent 26%);
 }
 
 .playground-stage[data-dragging="true"] {
@@ -698,11 +697,15 @@ html.page-transition-entering body > .portfolio-page {
   z-index: 20;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.4rem 0.6rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(12px);
   color: rgba(0, 0, 0, 0.62);
   font-size: 0.72rem;
   line-height: 1;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   pointer-events: none;
 }
@@ -714,80 +717,86 @@ html.page-transition-entering body > .portfolio-page {
   background: rgba(0, 0, 0, 0.24);
 }
 
-.playground-canvas,
-.playground-tile {
-  position: absolute;
-  inset: 0 auto auto 0;
-}
-
 .playground-canvas {
-  will-change: transform;
-}
-
-.playground-tile {
-  width: var(--playground-tile-width);
-  height: var(--playground-tile-height);
+  position: absolute;
+  inset: 0;
 }
 
 .playground-card {
   position: absolute;
+  min-width: 0;
+  min-height: 0;
   flex-direction: column;
-  gap: 0.56rem;
-  padding: 0.48rem;
-  border: 1px solid rgba(0, 0, 0, 0.09);
-  background: var(--card-paper);
-  box-shadow:
-    0 22px 40px rgba(54, 45, 34, 0.08),
-    0 4px 10px rgba(54, 45, 34, 0.04);
-  transform: rotate(var(--card-rotation));
+  gap: 0.45rem;
+  overflow: hidden;
+  transform-origin: center;
   pointer-events: none;
 }
 
-.playground-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 26%);
-  pointer-events: none;
+.playground-card[data-size="large"] {
+  gap: 0.52rem;
 }
 
 .playground-card-media {
-  position: relative;
+  display: block;
+  width: 100%;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.05);
 }
 
 .playground-card-image {
   display: block;
   width: 100%;
-  height: var(--card-image-height);
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   user-select: none;
+  pointer-events: none;
+}
+
+.playground-card-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
 }
 
 .playground-card-copy {
   position: relative;
+  min-height: 0;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.16rem;
+  padding: 0;
+}
+
+.playground-card-title,
+.playground-card-caption {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.25rem;
+  letter-spacing: -0.02em;
 }
 
 .playground-card-title {
-  font-family: var(--font-display);
-  font-size: clamp(1.35rem, 1.5vw, 1.6rem);
-  line-height: 0.95;
-  letter-spacing: -0.03em;
+  color: rgba(0, 0, 0, 0.92);
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .playground-card-caption {
-  color: rgba(0, 0, 0, 0.58);
-  font-size: 0.875rem;
-  line-height: 1.32;
-  letter-spacing: -0.015em;
+  color: rgba(0, 0, 0, 0.56);
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 body.playground-dragging,
 body.playground-dragging * {
   user-select: none !important;
+  cursor: grabbing !important;
 }
 
 .next-project-card {
@@ -1086,8 +1095,7 @@ body.playground-dragging * {
 
   .project-card,
   .placeholder-surface,
-  .next-project-card,
-  .playground-card {
+  .next-project-card {
     padding: 1.5rem;
   }
 
@@ -1101,16 +1109,11 @@ body.playground-dragging * {
   }
 
   .playground-card {
-    gap: 0.48rem;
-    padding: 0.42rem;
+    gap: 0.56rem;
   }
 
-  .playground-card-title {
-    font-size: 1.2rem;
-  }
-
-  .playground-card-caption {
-    font-size: 0.82rem;
+  .playground-card[data-size="large"] {
+    gap: 0.6rem;
   }
 
   .project-card {

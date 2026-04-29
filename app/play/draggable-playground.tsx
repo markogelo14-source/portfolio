@@ -1,60 +1,92 @@
 "use client";
 
 import type {
-  CSSProperties,
   PointerEvent as ReactPointerEvent,
   WheelEvent as ReactWheelEvent,
 } from "react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 import { playgroundCards, type PlaygroundCard } from "./playground-data";
+
+type DragSession = {
+  originX: number;
+  originY: number;
+  pointerId: number;
+  startX: number;
+  startY: number;
+};
 
 type Offset = {
   x: number;
   y: number;
 };
 
-type DragState = {
-  lastTime: number;
-  lastX: number;
-  lastY: number;
-  originX: number;
-  originY: number;
-  pointerId: number;
-  startX: number;
-  startY: number;
-  velocityX: number;
-  velocityY: number;
+type LayoutAnchor = {
+  centerX: number;
+  centerY: number;
 };
 
-type LayoutCard = PlaygroundCard & {
+type LayoutItemBase = {
   height: number;
   id: string;
-  imageHeight: number;
-  index: number;
-  paper: string;
   rotation: number;
+  size: "small" | "medium" | "large";
   width: number;
   x: number;
   y: number;
+  zIndex: number;
 };
 
-const TILE_WIDTH = 3360;
-const TILE_HEIGHT = 2520;
-const TILE_PADDING = 116;
-const CARD_GAP = 52;
-const RELEASE_TRANSITION = "transform 350ms cubic-bezier(0.22, 1, 0.36, 1)";
-const TILE_RANGE = [-2, -1, 0, 1, 2];
+type LayoutCard = PlaygroundCard &
+  LayoutItemBase & {
+    imageHeight: number;
+  };
+
+type LayoutItem = LayoutCard;
+
+type RenderedItemCopy = {
+  copyX: number;
+  copyY: number;
+  item: LayoutItem;
+  key: string;
+};
+
+const TILE_SIZE = 2200;
+const TILE_PADDING = 96;
+const CARD_CLEARANCE = 54;
+const CARD_VISUAL_BLEED = 10;
+const CARD_SCALE = 1.3;
+const PLACEMENT_RING_STEPS = [0, 28, 64, 112, 168, 236] as const;
+const TILE_RANGE = [-1, 0, 1] as const;
+const LAYOUT_SEED = "playground-layout-v4";
 const INITIAL_OFFSET = {
-  x: -TILE_WIDTH * 0.34,
-  y: -TILE_HEIGHT * 0.3,
+  x: -Math.round(TILE_SIZE * 0.34),
+  y: -Math.round(TILE_SIZE * 0.22),
 };
-const PAPER_SWATCHES = ["#faf5ef", "#f6eee2", "#f2eee7", "#eef2ec", "#eef3f8"];
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
+const IMAGE_SIZES = {
+  large: "400px",
+  medium: "290px",
+  small: "190px",
+} satisfies Record<PlaygroundCard["size"], string>;
+const CARD_ANCHORS = {
+  large: [
+    { centerX: 290, centerY: 280 },
+    { centerX: 1480, centerY: 1120 },
+    { centerX: 330, centerY: 1840 },
+  ],
+  medium: [
+    { centerX: 1020, centerY: 420 },
+    { centerX: 1930, centerY: 380 },
+    { centerX: 380, centerY: 980 },
+    { centerX: 1230, centerY: 2020 },
+  ],
+  small: [
+    { centerX: 1540, centerY: 230 },
+    { centerX: 900, centerY: 1510 },
+    { centerX: 1950, centerY: 1750 },
+  ],
+} satisfies Record<PlaygroundCard["size"], readonly LayoutAnchor[]>;
 
 function hashString(value: string) {
   let hash = 2166136261;
@@ -73,6 +105,7 @@ function createSeededRandom(seed: number) {
   return function seededRandom() {
     value |= 0;
     value = (value + 0x6d2b79f5) | 0;
+
     let next = Math.imul(value ^ (value >>> 15), 1 | value);
 
     next ^= next + Math.imul(next ^ (next >>> 7), 61 | next);
@@ -81,308 +114,536 @@ function createSeededRandom(seed: number) {
   };
 }
 
-function normalizeAxis(value: number, size: number) {
-  if (Math.abs(value) < size * 48) {
-    return value;
+function seededShuffle<T>(items: readonly T[], random: () => number) {
+  const result = [...items];
+
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+
+    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
   }
 
-  return value % size;
+  return result;
 }
 
-function normalizeOffset(offset: Offset) {
+function slugify(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function scaleDimension(value: number) {
+  return Math.round(value * CARD_SCALE);
+}
+
+function wrapOffset(value: number, size: number) {
+  return ((value % size) + size) % size;
+}
+
+function getToroidalAxisDelta(firstValue: number, secondValue: number, size: number) {
+  const directDistance = Math.abs(firstValue - secondValue);
+
+  return Math.min(directDistance, size - directDistance);
+}
+
+function getRectGap(firstItem: LayoutItem, secondItem: LayoutItem) {
+  const firstBounds = getRotatedBounds(firstItem);
+  const secondBounds = getRotatedBounds(secondItem);
+  const gapX = Math.max(
+    secondBounds.left - firstBounds.right,
+    firstBounds.left - secondBounds.right,
+    0,
+  );
+  const gapY = Math.max(
+    secondBounds.top - firstBounds.bottom,
+    firstBounds.top - secondBounds.bottom,
+    0,
+  );
+
+  return Math.hypot(gapX, gapY);
+}
+
+function getRotatedBounds(item: LayoutItem) {
+  const radians = (Math.abs(item.rotation) * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const rotatedWidth =
+    Math.abs(item.width * cos) + Math.abs(item.height * sin) + CARD_VISUAL_BLEED * 2;
+  const rotatedHeight =
+    Math.abs(item.width * sin) + Math.abs(item.height * cos) + CARD_VISUAL_BLEED * 2;
+  const centerX = item.x + item.width / 2;
+  const centerY = item.y + item.height / 2;
+
   return {
-    x: normalizeAxis(offset.x, TILE_WIDTH),
-    y: normalizeAxis(offset.y, TILE_HEIGHT),
+    bottom: centerY + rotatedHeight / 2,
+    left: centerX - rotatedWidth / 2,
+    right: centerX + rotatedWidth / 2,
+    top: centerY - rotatedHeight / 2,
   };
 }
 
+function getToroidalRectGap(firstItem: LayoutItem, secondItem: LayoutItem) {
+  let minimumGap = Number.POSITIVE_INFINITY;
+
+  for (const shiftX of [-TILE_SIZE, 0, TILE_SIZE]) {
+    for (const shiftY of [-TILE_SIZE, 0, TILE_SIZE]) {
+      minimumGap = Math.min(
+        minimumGap,
+        getRectGap(firstItem, {
+          ...secondItem,
+          x: secondItem.x + shiftX,
+          y: secondItem.y + shiftY,
+        }),
+      );
+    }
+  }
+
+  return minimumGap;
+}
+
+function hasCollision(candidate: LayoutItem, placedItems: readonly LayoutItem[]) {
+  return placedItems.some((placedItem) => {
+    return getToroidalRectGap(candidate, placedItem) < CARD_CLEARANCE;
+  });
+}
+
+function getItemRotation(seedKey: string, range: number) {
+  const random = createSeededRandom(hashString(`${LAYOUT_SEED}:rotation:${seedKey}`));
+  let rotation = (random() * 2 - 1) * range;
+
+  if (Math.abs(rotation) < 0.7) {
+    rotation = rotation < 0 ? rotation - 0.7 : rotation + 0.7;
+  }
+
+  return Number(rotation.toFixed(2));
+}
+
 function getCardMeasurements(card: PlaygroundCard, index: number) {
-  const random = createSeededRandom(hashString(`${card.title}-${card.image}-${index}`));
+  const random = createSeededRandom(hashString(`${card.title}:${card.image}:${index}`));
   const baseWidth =
-    card.size === "large" ? 520 : card.size === "medium" ? 390 : 286;
+    card.size === "large" ? 322 : card.size === "medium" ? 252 : 198;
   const widthJitter =
-    card.size === "large" ? 72 : card.size === "medium" ? 44 : 28;
-  const imageAspectRatios = [0.82, 0.94, 1.08, 1.22, 1.36];
-  const width = Math.round(baseWidth + (random() * 2 - 1) * widthJitter);
-  const imageAspectRatio =
-    imageAspectRatios[Math.floor(random() * imageAspectRatios.length)] ?? 1;
-  const imageHeight = Math.round(width / imageAspectRatio);
-  const textHeight = card.size === "large" ? 108 : card.size === "medium" ? 98 : 90;
-  const rotation = (random() * 7 - 3.5).toFixed(2);
-  const paper = PAPER_SWATCHES[Math.floor(random() * PAPER_SWATCHES.length)] ?? PAPER_SWATCHES[0];
+    card.size === "large" ? 28 : card.size === "medium" ? 20 : 14;
+  const width = scaleDimension(
+    Math.round(baseWidth + (random() * 2 - 1) * widthJitter),
+  );
+  const mediaAspectRatio = card.mediaWidth / card.mediaHeight;
+  const imageHeight = Math.round(width / mediaAspectRatio);
+  const copyHeight = scaleDimension(
+    card.size === "large" ? 62 : card.size === "medium" ? 58 : 54,
+  );
 
   return {
-    height: imageHeight + textHeight,
+    height: imageHeight + copyHeight,
     imageHeight,
-    paper,
-    rotation: Number(rotation),
+    rotation: getItemRotation(
+      `${card.title}:${card.image}:${card.size}:${index}`,
+      card.size === "large" ? 2.8 : card.size === "medium" ? 3.5 : 4.2,
+    ),
     width,
   };
 }
 
-function hasCollision(candidate: LayoutCard, placedCards: readonly LayoutCard[]) {
-  return placedCards.some((existingCard) => {
-    return (
-      candidate.x < existingCard.x + existingCard.width + CARD_GAP &&
-      candidate.x + candidate.width + CARD_GAP > existingCard.x &&
-      candidate.y < existingCard.y + existingCard.height + CARD_GAP &&
-      candidate.y + candidate.height + CARD_GAP > existingCard.y
-    );
-  });
-}
+function getPlacementScore(
+  candidate: LayoutItem,
+  placedItems: readonly LayoutItem[],
+  anchor: LayoutAnchor,
+) {
+  if (placedItems.length === 0) {
+    const anchorDx = candidate.x + candidate.width / 2 - anchor.centerX;
+    const anchorDy = candidate.y + candidate.height / 2 - anchor.centerY;
 
-function scoreCandidate(candidate: LayoutCard, placedCards: readonly LayoutCard[]) {
-  if (placedCards.length === 0) {
-    return Number.MAX_SAFE_INTEGER;
+    return -Math.hypot(anchorDx, anchorDy) * 0.08;
   }
 
-  let nearestCardDistance = Number.POSITIVE_INFINITY;
+  let nearestGap = Number.POSITIVE_INFINITY;
+  let clusterPenalty = 0;
+  let alignmentPenalty = 0;
+  let centerDistanceSum = 0;
+  const candidateCenterX = candidate.x + candidate.width / 2;
+  const candidateCenterY = candidate.y + candidate.height / 2;
 
-  for (const placedCard of placedCards) {
-    const dx =
-      candidate.x + candidate.width / 2 - (placedCard.x + placedCard.width / 2);
-    const dy =
-      candidate.y + candidate.height / 2 - (placedCard.y + placedCard.height / 2);
+  for (const placedItem of placedItems) {
+    const gap = getToroidalRectGap(candidate, placedItem);
+    const placedCenterX = placedItem.x + placedItem.width / 2;
+    const placedCenterY = placedItem.y + placedItem.height / 2;
+    const dx = getToroidalAxisDelta(candidateCenterX, placedCenterX, TILE_SIZE);
+    const dy = getToroidalAxisDelta(candidateCenterY, placedCenterY, TILE_SIZE);
+    const centerDistance = Math.hypot(dx, dy);
 
-    nearestCardDistance = Math.min(
-      nearestCardDistance,
-      Math.hypot(dx, dy),
-    );
+    nearestGap = Math.min(nearestGap, gap);
+    centerDistanceSum += centerDistance;
+
+    if (centerDistance < 320) {
+      clusterPenalty += (320 - centerDistance) / 320;
+    }
+
+    if (dx < 72) {
+      alignmentPenalty += (72 - dx) * 0.16;
+    }
+
+    if (dy < 72) {
+      alignmentPenalty += (72 - dy) * 0.16;
+    }
   }
 
-  const edgeDistance = Math.min(
-    candidate.x,
-    candidate.y,
-    TILE_WIDTH - (candidate.x + candidate.width),
-    TILE_HEIGHT - (candidate.y + candidate.height),
+  const anchorDx = candidateCenterX - anchor.centerX;
+  const anchorDy = candidateCenterY - anchor.centerY;
+  const anchorDistancePenalty = Math.hypot(anchorDx, anchorDy) * 0.08;
+
+  return (
+    Math.min(nearestGap, 160) * 3.1 +
+    centerDistanceSum * 0.02 -
+    clusterPenalty * 22 -
+    alignmentPenalty -
+    anchorDistancePenalty
   );
-
-  return nearestCardDistance + edgeDistance * 0.35;
 }
 
-function placeCards(cards: readonly PlaygroundCard[]) {
-  const preparedCards = cards.map((card, index) => {
+function getCandidateAtAnchor(
+  item: LayoutItem,
+  anchor: LayoutAnchor,
+  radius: number,
+  random: () => number,
+) {
+  const turns = radius === 0 ? 1 : 5;
+  let bestCandidate: LayoutItem | null = null;
+
+  for (let attempt = 0; attempt < turns; attempt += 1) {
+    const angle = random() * Math.PI * 2 + attempt * ((Math.PI * 2) / turns);
+    const offsetX = Math.cos(angle) * radius + (random() * 2 - 1) * 10;
+    const offsetY = Math.sin(angle) * radius + (random() * 2 - 1) * 10;
+    const candidate: LayoutItem = {
+      ...item,
+      x: clamp(
+        Math.round(anchor.centerX - item.width / 2 + offsetX),
+        TILE_PADDING,
+        TILE_SIZE - item.width - TILE_PADDING,
+      ),
+      y: clamp(
+        Math.round(anchor.centerY - item.height / 2 + offsetY),
+        TILE_PADDING,
+        TILE_SIZE - item.height - TILE_PADDING,
+      ),
+    };
+
+    if (!bestCandidate) {
+      bestCandidate = candidate;
+    }
+
+    if (radius === 0) {
+      break;
+    }
+  }
+
+  return bestCandidate;
+}
+
+function placeScatterFallback(item: LayoutItem, placedItems: readonly LayoutItem[]) {
+  const random = createSeededRandom(hashString(`${LAYOUT_SEED}:fallback:${item.id}`));
+  let bestCandidate: LayoutItem | null = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  const fallbackAnchor = {
+    centerX: TILE_SIZE / 2,
+    centerY: TILE_SIZE / 2,
+  };
+
+  for (let attempt = 0; attempt < 240; attempt += 1) {
+    const candidate: LayoutItem = {
+      ...item,
+      x: Math.round(
+        TILE_PADDING + random() * (TILE_SIZE - item.width - TILE_PADDING * 2),
+      ),
+      y: Math.round(
+        TILE_PADDING + random() * (TILE_SIZE - item.height - TILE_PADDING * 2),
+      ),
+    };
+
+    if (hasCollision(candidate, placedItems)) {
+      continue;
+    }
+
+    const score = getPlacementScore(candidate, placedItems, fallbackAnchor) + random() * 10;
+
+    if (score > bestScore) {
+      bestCandidate = candidate;
+      bestScore = score;
+    }
+  }
+
+  return (
+    bestCandidate ?? {
+      ...item,
+      x: TILE_PADDING,
+      y: TILE_PADDING,
+    }
+  );
+}
+
+function placeAnchoredItems<T extends LayoutItem>(
+  items: readonly T[],
+  anchors: readonly LayoutAnchor[],
+  placedItems: LayoutItem[],
+) {
+  const groupRandom = createSeededRandom(
+    hashString(`${LAYOUT_SEED}:group:${items.map((item) => item.id).join("|")}`),
+  );
+  const shuffledItems = seededShuffle(items, groupRandom);
+  const shuffledAnchors = seededShuffle(anchors, groupRandom);
+  const placedGroup: T[] = [];
+
+  shuffledItems.forEach((item, itemIndex) => {
+    const random = createSeededRandom(hashString(`${LAYOUT_SEED}:place:${item.id}`));
+    const anchorOrder = seededShuffle(shuffledAnchors, random);
+    const preferredAnchor = anchorOrder[itemIndex % anchorOrder.length] ?? anchorOrder[0];
+    const candidates: Array<{ anchor: LayoutAnchor; candidate: LayoutItem; score: number }> = [];
+
+    for (const anchor of preferredAnchor ? [preferredAnchor, ...anchorOrder] : anchorOrder) {
+      for (const radius of PLACEMENT_RING_STEPS) {
+        const candidate = getCandidateAtAnchor(item, anchor, radius, random);
+
+        if (!candidate || hasCollision(candidate, placedItems)) {
+          continue;
+        }
+
+        candidates.push({
+          anchor,
+          candidate,
+          score: getPlacementScore(candidate, placedItems, anchor) + random() * 6,
+        });
+      }
+    }
+
+    const bestCandidate =
+      candidates.sort((firstCandidate, secondCandidate) => {
+        return secondCandidate.score - firstCandidate.score;
+      })[0]?.candidate ?? placeScatterFallback(item, placedItems);
+
+    placedItems.push(bestCandidate);
+    placedGroup.push(bestCandidate as T);
+  });
+
+  return placedGroup;
+}
+
+function buildLayout(cards: readonly PlaygroundCard[]): LayoutItem[] {
+  const preparedCards: LayoutCard[] = cards.map((card, index) => {
     return {
       ...card,
       ...getCardMeasurements(card, index),
-      id: `${index}-${card.title.toLowerCase().replace(/\s+/g, "-")}`,
-      index,
+      id: `${slugify(card.title)}-${index}`,
       x: 0,
       y: 0,
+      zIndex: 0,
     };
   });
-  const placementQueue = [...preparedCards].sort((firstCard, secondCard) => {
-    const sizeWeight = {
-      large: 3,
-      medium: 2,
-      small: 1,
-    };
+  const placedItems: LayoutItem[] = [];
+  const cardsBySize: Record<PlaygroundCard["size"], LayoutCard[]> = {
+    large: [],
+    medium: [],
+    small: [],
+  };
 
-    return (
-      sizeWeight[secondCard.size] - sizeWeight[firstCard.size] ||
-      firstCard.index - secondCard.index
-    );
-  });
-  const placedCards: LayoutCard[] = [];
-
-  for (const card of placementQueue) {
-    const random = createSeededRandom(hashString(`${card.id}-placement`));
-    let bestCandidate: LayoutCard | null = null;
-    let bestScore = Number.NEGATIVE_INFINITY;
-
-    for (let attempt = 0; attempt < 260; attempt += 1) {
-      const candidate: LayoutCard = {
-        ...card,
-        x:
-          TILE_PADDING +
-          random() * (TILE_WIDTH - card.width - TILE_PADDING * 2),
-        y:
-          TILE_PADDING +
-          random() * (TILE_HEIGHT - card.height - TILE_PADDING * 2),
-      };
-
-      if (hasCollision(candidate, placedCards)) {
-        continue;
-      }
-
-      const score = scoreCandidate(candidate, placedCards) + random() * 60;
-
-      if (score > bestScore) {
-        bestCandidate = candidate;
-        bestScore = score;
-      }
-    }
-
-    if (!bestCandidate) {
-      for (
-        let y = TILE_PADDING;
-        y <= TILE_HEIGHT - card.height - TILE_PADDING;
-        y += 40
-      ) {
-        for (
-          let x = TILE_PADDING;
-          x <= TILE_WIDTH - card.width - TILE_PADDING;
-          x += 40
-        ) {
-          const fallbackCandidate: LayoutCard = {
-            ...card,
-            x,
-            y,
-          };
-
-          if (!hasCollision(fallbackCandidate, placedCards)) {
-            bestCandidate = fallbackCandidate;
-            break;
-          }
-        }
-
-        if (bestCandidate) {
-          break;
-        }
-      }
-    }
-
-    placedCards.push(
-      bestCandidate ?? {
-        ...card,
-        x: TILE_PADDING,
-        y: TILE_PADDING,
-      },
-    );
+  for (const card of preparedCards) {
+    cardsBySize[card.size].push(card);
   }
 
-  return placedCards.sort((firstCard, secondCard) => firstCard.index - secondCard.index);
+  placeAnchoredItems(cardsBySize.large, CARD_ANCHORS.large, placedItems);
+  placeAnchoredItems(cardsBySize.medium, CARD_ANCHORS.medium, placedItems);
+  placeAnchoredItems(cardsBySize.small, CARD_ANCHORS.small, placedItems);
+
+  return placedItems
+    .sort((firstItem, secondItem) => {
+      return (
+        firstItem.y - secondItem.y ||
+        firstItem.x - secondItem.x ||
+        firstItem.id.localeCompare(secondItem.id)
+      );
+    })
+    .map((item, index) => ({
+      ...item,
+      zIndex: index + 1,
+    }));
 }
 
-const layoutCards = placeCards(playgroundCards);
+function getItemTransform(item: LayoutItem, copyX: number, copyY: number, offset: Offset) {
+  const x = wrapOffset(item.x + offset.x, TILE_SIZE) + copyX * TILE_SIZE;
+  const y = wrapOffset(item.y + offset.y, TILE_SIZE) + copyY * TILE_SIZE;
+
+  return `translate3d(${x}px, ${y}px, 0) rotate(${item.rotation}deg)`;
+}
+
+function getItemVisibleArea(
+  item: LayoutItem,
+  offset: Offset,
+  viewportWidth: number,
+  viewportHeight: number,
+) {
+  let largestVisibleArea = 0;
+
+  for (const copyX of TILE_RANGE) {
+    for (const copyY of TILE_RANGE) {
+      const x = wrapOffset(item.x + offset.x, TILE_SIZE) + copyX * TILE_SIZE;
+      const y = wrapOffset(item.y + offset.y, TILE_SIZE) + copyY * TILE_SIZE;
+      const visibleWidth = Math.max(
+        0,
+        Math.min(viewportWidth, x + item.width) - Math.max(0, x),
+      );
+      const visibleHeight = Math.max(
+        0,
+        Math.min(viewportHeight, y + item.height) - Math.max(0, y),
+      );
+
+      largestVisibleArea = Math.max(largestVisibleArea, visibleWidth * visibleHeight);
+    }
+  }
+
+  return largestVisibleArea;
+}
+
+function getOptimalInitialOffset(
+  items: readonly LayoutItem[],
+  viewportWidth: number,
+  viewportHeight: number,
+) {
+  const candidateXs = new Set<number>([INITIAL_OFFSET.x]);
+  const candidateYs = new Set<number>([INITIAL_OFFSET.y]);
+
+  for (const item of items) {
+    candidateXs.add(-item.x);
+    candidateXs.add(viewportWidth - (item.x + item.width));
+    candidateXs.add(Math.round(viewportWidth / 2 - (item.x + item.width / 2)));
+
+    candidateYs.add(-item.y);
+    candidateYs.add(viewportHeight - (item.y + item.height));
+    candidateYs.add(Math.round(viewportHeight / 2 - (item.y + item.height / 2)));
+  }
+
+  let bestOffset = INITIAL_OFFSET;
+  let bestVisibleCount = -1;
+  let bestVisibleArea = -1;
+
+  for (const x of candidateXs) {
+    for (const y of candidateYs) {
+      const candidateOffset = { x, y };
+      let visibleCount = 0;
+      let visibleArea = 0;
+
+      for (const item of items) {
+        const itemVisibleArea = getItemVisibleArea(
+          item,
+          candidateOffset,
+          viewportWidth,
+          viewportHeight,
+        );
+
+        if (itemVisibleArea > 400) {
+          visibleCount += 1;
+        }
+
+        visibleArea += itemVisibleArea;
+      }
+
+      if (
+        visibleCount > bestVisibleCount ||
+        (visibleCount === bestVisibleCount && visibleArea > bestVisibleArea)
+      ) {
+        bestOffset = candidateOffset;
+        bestVisibleCount = visibleCount;
+        bestVisibleArea = visibleArea;
+      }
+    }
+  }
+
+  return bestOffset;
+}
+
+function isVideoCard(card: PlaygroundCard) {
+  if (card.mediaType) {
+    return card.mediaType === "video";
+  }
+
+  return /\.(mp4|webm|mov|m4v)$/i.test(card.image);
+}
+
+const playgroundLayout = buildLayout(playgroundCards);
+const renderedItemCopies: readonly RenderedItemCopy[] = playgroundLayout.flatMap((item) =>
+  TILE_RANGE.flatMap((copyY) =>
+    TILE_RANGE.map((copyX) => ({
+      copyX,
+      copyY,
+      item,
+      key: `${item.id}-${copyX}-${copyY}`,
+    })),
+  ),
+);
 
 export function DraggablePlayground() {
-  const [offset, setOffset] = useState<Offset>(INITIAL_OFFSET);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isReleaseEasing, setIsReleaseEasing] = useState(false);
-  const canvasRef = useRef<HTMLDivElement | null>(null);
-  const dragStateRef = useRef<DragState | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const dragSessionRef = useRef<DragSession | null>(null);
+  const hasInteractedRef = useRef(false);
   const offsetRef = useRef(INITIAL_OFFSET);
-  const targetOffsetRef = useRef(INITIAL_OFFSET);
-  const releaseTimeoutRef = useRef<number | null>(null);
-  const releaseTransitionRef = useRef(false);
+  const animationFrameRef = useRef<number | null>(null);
+  const itemRefs = useRef<(HTMLElement | null)[]>([]);
 
-  function updateOffset(nextOffset: Offset) {
-    const normalizedOffset = normalizeOffset(nextOffset);
+  function setDragging(isDragging: boolean) {
+    const stage = stageRef.current;
 
-    offsetRef.current = normalizedOffset;
-    setOffset(normalizedOffset);
+    if (stage) {
+      stage.dataset.dragging = isDragging ? "true" : "false";
+    }
+
+    document.body.classList.toggle("playground-dragging", isDragging);
   }
 
-  function stopScrollEasing() {
+  function paintItems() {
+    animationFrameRef.current = null;
+
+    renderedItemCopies.forEach((entry, index) => {
+      const itemElement = itemRefs.current[index];
+
+      if (!itemElement) {
+        return;
+      }
+
+      itemElement.style.transform = getItemTransform(
+        entry.item,
+        entry.copyX,
+        entry.copyY,
+        offsetRef.current,
+      );
+    });
+  }
+
+  function queuePaint() {
     if (animationFrameRef.current !== null) {
-      window.cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  }
-
-  function readCanvasOffset() {
-    const canvas = canvasRef.current;
-
-    if (!canvas) {
-      return offsetRef.current;
-    }
-
-    const transform = window.getComputedStyle(canvas).transform;
-
-    if (!transform || transform === "none") {
-      return offsetRef.current;
-    }
-
-    const matrix = new DOMMatrixReadOnly(transform);
-
-    return {
-      x: matrix.m41,
-      y: matrix.m42,
-    };
-  }
-
-  function stopReleaseEasing() {
-    if (!releaseTransitionRef.current) {
       return;
     }
 
-    if (releaseTimeoutRef.current !== null) {
-      window.clearTimeout(releaseTimeoutRef.current);
-      releaseTimeoutRef.current = null;
-    }
-
-    releaseTransitionRef.current = false;
-    setIsReleaseEasing(false);
-    const currentOffset = readCanvasOffset();
-
-    targetOffsetRef.current = currentOffset;
-    updateOffset(currentOffset);
+    animationFrameRef.current = window.requestAnimationFrame(paintItems);
   }
 
-  function animateTowardTarget() {
-    if (animationFrameRef.current !== null || dragStateRef.current || releaseTransitionRef.current) {
-      return;
-    }
-
-    const step = () => {
-      animationFrameRef.current = null;
-
-      if (dragStateRef.current || releaseTransitionRef.current) {
-        return;
-      }
-
-      const currentOffset = offsetRef.current;
-      const targetOffset = targetOffsetRef.current;
-      const dx = targetOffset.x - currentOffset.x;
-      const dy = targetOffset.y - currentOffset.y;
-
-      if (Math.abs(dx) < 0.2 && Math.abs(dy) < 0.2) {
-        updateOffset(targetOffset);
-        return;
-      }
-
-      updateOffset({
-        x: currentOffset.x + dx * 0.16,
-        y: currentOffset.y + dy * 0.16,
-      });
-
-      animationFrameRef.current = window.requestAnimationFrame(step);
+  function updateOffset(nextX: number, nextY: number) {
+    offsetRef.current = {
+      x: nextX,
+      y: nextY,
     };
-
-    animationFrameRef.current = window.requestAnimationFrame(step);
+    queuePaint();
   }
 
   function finishDrag(pointerId: number) {
-    const dragState = dragStateRef.current;
-
-    if (!dragState || dragState.pointerId !== pointerId) {
+    if (!dragSessionRef.current || dragSessionRef.current.pointerId !== pointerId) {
       return;
     }
 
-    dragStateRef.current = null;
-    setIsDragging(false);
-
-    const nextOffset = {
-      x: offsetRef.current.x + clamp(dragState.velocityX * 220, -220, 220),
-      y: offsetRef.current.y + clamp(dragState.velocityY * 220, -220, 220),
-    };
-
-    releaseTransitionRef.current = true;
-    setIsReleaseEasing(true);
-    targetOffsetRef.current = nextOffset;
-    updateOffset(nextOffset);
-
-    if (releaseTimeoutRef.current !== null) {
-      window.clearTimeout(releaseTimeoutRef.current);
+    if (stageRef.current?.hasPointerCapture(pointerId)) {
+      stageRef.current.releasePointerCapture(pointerId);
     }
 
-    releaseTimeoutRef.current = window.setTimeout(() => {
-      releaseTransitionRef.current = false;
-      releaseTimeoutRef.current = null;
-      setIsReleaseEasing(false);
-    }, 350);
+    dragSessionRef.current = null;
+    setDragging(false);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -391,46 +652,30 @@ export function DraggablePlayground() {
     }
 
     event.preventDefault();
-    stopReleaseEasing();
-    stopScrollEasing();
-    targetOffsetRef.current = offsetRef.current;
-    dragStateRef.current = {
-      lastTime: performance.now(),
-      lastX: event.clientX,
-      lastY: event.clientY,
+    hasInteractedRef.current = true;
+    dragSessionRef.current = {
       originX: offsetRef.current.x,
       originY: offsetRef.current.y,
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      velocityX: 0,
-      velocityY: 0,
     };
-    setIsDragging(true);
+    setDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
-    const dragState = dragStateRef.current;
+    const dragSession = dragSessionRef.current;
 
-    if (!dragState || dragState.pointerId !== event.pointerId) {
+    if (!dragSession || dragSession.pointerId !== event.pointerId) {
       return;
     }
 
-    const now = performance.now();
-    const elapsed = Math.max(16, now - dragState.lastTime);
-    const nextOffset = {
-      x: dragState.originX + (event.clientX - dragState.startX),
-      y: dragState.originY + (event.clientY - dragState.startY),
-    };
-
-    dragState.velocityX = (event.clientX - dragState.lastX) / elapsed;
-    dragState.velocityY = (event.clientY - dragState.lastY) / elapsed;
-    dragState.lastTime = now;
-    dragState.lastX = event.clientX;
-    dragState.lastY = event.clientY;
-    targetOffsetRef.current = nextOffset;
-    updateOffset(nextOffset);
+    event.preventDefault();
+    updateOffset(
+      dragSession.originX + (event.clientX - dragSession.startX),
+      dragSession.originY + (event.clientY - dragSession.startY),
+    );
   }
 
   function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
@@ -448,126 +693,123 @@ export function DraggablePlayground() {
   function handleWheel(event: ReactWheelEvent<HTMLDivElement>) {
     event.preventDefault();
 
-    if (dragStateRef.current) {
+    if (dragSessionRef.current) {
       return;
     }
 
-    stopReleaseEasing();
-    targetOffsetRef.current = normalizeOffset({
-      x: targetOffsetRef.current.x - event.deltaX,
-      y: targetOffsetRef.current.y - event.deltaY,
-    });
-    animateTowardTarget();
+    hasInteractedRef.current = true;
+    updateOffset(offsetRef.current.x - event.deltaX, offsetRef.current.y - event.deltaY);
   }
 
-  useEffect(() => {
-    document.body.classList.toggle("playground-dragging", isDragging);
+  useLayoutEffect(() => {
+    function syncInitialViewport() {
+      const stage = stageRef.current;
+
+      if (!stage || hasInteractedRef.current) {
+        return;
+      }
+
+      const { width, height } = stage.getBoundingClientRect();
+
+      if (width <= 0 || height <= 0) {
+        return;
+      }
+
+      offsetRef.current = getOptimalInitialOffset(playgroundLayout, width, height);
+      paintItems();
+    }
+
+    syncInitialViewport();
+    window.addEventListener("resize", syncInitialViewport);
 
     return () => {
-      document.body.classList.remove("playground-dragging");
+      window.removeEventListener("resize", syncInitialViewport);
     };
-  }, [isDragging]);
+  }, []);
 
   useEffect(() => {
     return () => {
-      stopScrollEasing();
-
-      if (releaseTimeoutRef.current !== null) {
-        window.clearTimeout(releaseTimeoutRef.current);
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
       }
 
       document.body.classList.remove("playground-dragging");
     };
   }, []);
 
-  const currentTileX = Math.floor((-offset.x + TILE_WIDTH / 2) / TILE_WIDTH);
-  const currentTileY = Math.floor((-offset.y + TILE_HEIGHT / 2) / TILE_HEIGHT);
-
   return (
     <section
-      aria-label="Interactive playground of experiments and project fragments"
+      aria-label="Infinite playground of experiments and project fragments"
       className="playground-stage"
-      data-dragging={isDragging ? "true" : "false"}
+      data-dragging="false"
       onLostPointerCapture={handleLostPointerCapture}
       onPointerCancel={handlePointerCancel}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onWheel={handleWheel}
-      style={
-        {
-          "--playground-tile-height": `${TILE_HEIGHT}px`,
-          "--playground-tile-width": `${TILE_WIDTH}px`,
-        } as CSSProperties
-      }
+      ref={stageRef}
     >
       <div className="playground-helper">
-        <span>SCROLL / DRAG TO MOVE</span>
+        <span>SCROLL OR DRAG</span>
       </div>
 
-      <div
-        className="playground-canvas"
-        ref={canvasRef}
-        style={{
-          transform: `translate3d(${offset.x}px, ${offset.y}px, 0)`,
-          transition: isReleaseEasing ? RELEASE_TRANSITION : "none",
-        }}
-      >
-        {TILE_RANGE.flatMap((rowOffset) =>
-          TILE_RANGE.map((columnOffset) => {
-            const tileX = currentTileX + columnOffset;
-            const tileY = currentTileY + rowOffset;
-            const isPrimaryTile = tileX === currentTileX && tileY === currentTileY;
+      <div className="playground-canvas">
+        {renderedItemCopies.map((entry, index) => {
+          const isPrimaryCopy = entry.copyX === 0 && entry.copyY === 0;
 
-            return (
-              <div
-                aria-hidden={!isPrimaryTile}
-                className="playground-tile"
-                key={`${tileX}-${tileY}`}
-                style={{
-                  transform: `translate3d(${tileX * TILE_WIDTH}px, ${tileY * TILE_HEIGHT}px, 0)`,
-                }}
-              >
-                {layoutCards.map((card) => {
-                  return (
-                    <article
-                      className="playground-card"
-                      key={`${tileX}-${tileY}-${card.id}`}
-                      style={
-                        {
-                          "--card-image-height": `${card.imageHeight}px`,
-                          "--card-paper": card.paper,
-                          "--card-rotation": `${card.rotation}deg`,
-                          left: `${card.x}px`,
-                          top: `${card.y}px`,
-                          width: `${card.width}px`,
-                          zIndex: card.index + 1,
-                        } as CSSProperties
-                      }
-                    >
-                      <div className="playground-card-media">
-                        <Image
-                          alt={isPrimaryTile ? `${card.title}. ${card.caption}` : ""}
-                          className="playground-card-image"
-                          draggable={false}
-                          height={card.imageHeight}
-                          sizes="(max-width: 640px) 76vw, (max-width: 1024px) 42vw, 28vw"
-                          src={card.image}
-                          width={card.width}
-                        />
-                      </div>
-
-                      <div className="playground-card-copy">
-                        <h2 className="playground-card-title">{card.title}</h2>
-                        <p className="playground-card-caption">{card.caption}</p>
-                      </div>
-                    </article>
-                  );
-                })}
+          return (
+            <article
+              aria-hidden={!isPrimaryCopy}
+              className="playground-card"
+              data-size={entry.item.size}
+              key={entry.key}
+              ref={(node) => {
+                itemRefs.current[index] = node;
+              }}
+              style={{
+                height: `${entry.item.height}px`,
+                transform: getItemTransform(
+                  entry.item,
+                  entry.copyX,
+                  entry.copyY,
+                  INITIAL_OFFSET,
+                ),
+                width: `${entry.item.width}px`,
+                zIndex: entry.item.zIndex,
+              }}
+            >
+              <div className="playground-card-media">
+                {isVideoCard(entry.item) ? (
+                  <video
+                    aria-label={isPrimaryCopy ? `${entry.item.title}. ${entry.item.caption}` : ""}
+                    autoPlay
+                    className="playground-card-video"
+                    loop
+                    muted
+                    playsInline
+                    src={entry.item.image}
+                  />
+                ) : (
+                  <Image
+                    alt={isPrimaryCopy ? `${entry.item.title}. ${entry.item.caption}` : ""}
+                    className="playground-card-image"
+                    draggable={false}
+                    height={entry.item.mediaHeight}
+                    sizes={IMAGE_SIZES[entry.item.size]}
+                    src={entry.item.image}
+                    width={entry.item.mediaWidth}
+                  />
+                )}
               </div>
-            );
-          }),
-        )}
+
+              <div className="playground-card-copy">
+                <h2 className="playground-card-title">{entry.item.title}</h2>
+                <p className="playground-card-caption">{entry.item.caption}</p>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );

@@ -628,6 +628,168 @@ html.page-transition-entering body > .portfolio-page {
   color: var(--muted);
 }
 
+.playground-page {
+  position: relative;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.playground-page .site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  background: var(--canvas);
+}
+
+.playground-stage,
+.playground-helper,
+.playground-card,
+.playground-card-copy {
+  display: flex;
+}
+
+.playground-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  align-items: flex-end;
+  justify-content: flex-start;
+  cursor: grab;
+  touch-action: none;
+  overscroll-behavior: none;
+  background: #ffffff;
+}
+
+.playground-stage::before,
+.playground-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.playground-stage::before {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-position: center;
+  background-size: 7.5rem 7.5rem;
+  opacity: 0.34;
+}
+
+.playground-stage::after {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.36), transparent 0 48%),
+    radial-gradient(circle at 12% 28%, rgba(255, 255, 255, 0.34), transparent 0 18%);
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+.playground-stage[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+.playground-helper {
+  position: fixed;
+  left: clamp(1rem, 4vw, 2rem);
+  bottom: clamp(1rem, 3vw, 1.6rem);
+  z-index: 20;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 0.72rem;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.playground-helper::before {
+  content: "";
+  width: 1.8rem;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.playground-canvas,
+.playground-tile {
+  position: absolute;
+  inset: 0 auto auto 0;
+}
+
+.playground-canvas {
+  will-change: transform;
+}
+
+.playground-tile {
+  width: var(--playground-tile-width);
+  height: var(--playground-tile-height);
+}
+
+.playground-card {
+  position: absolute;
+  flex-direction: column;
+  gap: 0.56rem;
+  padding: 0.48rem;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  background: var(--card-paper);
+  box-shadow:
+    0 22px 40px rgba(54, 45, 34, 0.08),
+    0 4px 10px rgba(54, 45, 34, 0.04);
+  transform: rotate(var(--card-rotation));
+  pointer-events: none;
+}
+
+.playground-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 26%);
+  pointer-events: none;
+}
+
+.playground-card-media {
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.playground-card-image {
+  display: block;
+  width: 100%;
+  height: var(--card-image-height);
+  object-fit: cover;
+  user-select: none;
+}
+
+.playground-card-copy {
+  position: relative;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.playground-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 1.5vw, 1.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.playground-card-caption {
+  color: rgba(0, 0, 0, 0.58);
+  font-size: 0.875rem;
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+}
+
+body.playground-dragging,
+body.playground-dragging * {
+  user-select: none !important;
+}
+
 .next-project-card {
   min-height: 6.5rem;
   flex-direction: column;
@@ -924,12 +1086,31 @@ html.page-transition-entering body > .portfolio-page {
 
   .project-card,
   .placeholder-surface,
-  .next-project-card {
+  .next-project-card,
+  .playground-card {
     padding: 1.5rem;
   }
 
   .site-nav-shell {
     gap: 0.75rem;
+  }
+
+  .playground-helper {
+    left: 1rem;
+    bottom: 1rem;
+  }
+
+  .playground-card {
+    gap: 0.48rem;
+    padding: 0.42rem;
+  }
+
+  .playground-card-title {
+    font-size: 1.2rem;
+  }
+
+  .playground-card-caption {
+    font-size: 0.82rem;
   }
 
   .project-card {
@@ -991,6 +1172,11 @@ html.page-transition-entering body > .portfolio-page {
 
   .photo-lightbox-arrow-next {
     right: 1rem;
+  }
+
+  .playground-helper {
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
   }
 
   .underline {

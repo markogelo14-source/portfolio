@@ -924,6 +924,9 @@ body.playground-dragging * {
 }
 
 .photos-page {
+  width: 100%;
+  max-width: none;
+  padding-inline: 1rem;
   padding-bottom: 5rem;
 }
 
@@ -936,11 +939,10 @@ body.playground-dragging * {
 
 .photo-grid {
   display: grid;
-  width: min(calc(100vw - 2rem), 73.875rem);
+  width: min(100%, 73.875rem);
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
-  margin-inline: 50%;
-  transform: translateX(-50%);
+  margin-inline: auto;
 }
 
 .photo-tile {
@@ -969,16 +971,21 @@ body.playground-dragging * {
   display: block;
   width: 100%;
   height: 100%;
-  background-image: var(--photo-image), var(--photo-fill);
-  background-position: var(--photo-position), center;
-  background-repeat: no-repeat;
-  background-size: cover, cover;
+  overflow: hidden;
+  background: var(--photo-fill);
+}
+
+.photo-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition:
     filter 180ms ease,
     transform 220ms ease;
 }
 
-.photo-tile:hover .photo-surface {
+.photo-tile:hover .photo-image {
   filter: saturate(1.05) contrast(1.02);
   transform: scale(1.018);
 }
@@ -1006,13 +1013,16 @@ body.playground-dragging * {
   margin: 0;
 }
 
-.photo-lightbox-image {
+.photo-lightbox-media {
   width: 100%;
   height: min(78vh, 52rem);
-  background-image: var(--photo-image), var(--photo-fill);
-  background-position: var(--photo-position), center;
-  background-repeat: no-repeat;
-  background-size: contain, cover;
+  background: var(--photo-fill);
+}
+
+.photo-lightbox-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .photo-lightbox-caption {
@@ -1226,7 +1236,7 @@ body.playground-dragging * {
     grid-column: 1;
   }
 
-  .photo-lightbox-image {
+  .photo-lightbox-media {
     height: 72vh;
   }
 

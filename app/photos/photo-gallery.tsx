@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
@@ -11,17 +12,11 @@ type PhotoGalleryProps = {
   photos: PhotoItem[];
 };
 
-const gridPattern = [
-  { column: 1, row: 1 },
-  { column: 2, row: 1 },
-  { column: 4, row: 1 },
-  { column: 2, row: 2 },
-  { column: 3, row: 2 },
-  { column: 4, row: 2 },
-  { column: 1, row: 3 },
-  { column: 2, row: 3 },
-  { column: 3, row: 3 },
-] as const;
+const photoTileSizes = [
+  "(max-width: 640px) calc((100vw - 2.5rem) / 2)",
+  "(max-width: 980px) calc((100vw - 3rem) / 3)",
+  "calc((min(100vw - 2rem, 73.875rem) - 1.5rem) / 4)",
+].join(", ");
 
 function getFallbackLayer(fill?: string) {
   if (!fill) {
@@ -35,16 +30,9 @@ function getFallbackLayer(fill?: string) {
   return `linear-gradient(${fill}, ${fill})`;
 }
 
-function getPhotoStyle(photo: PhotoItem, index: number) {
-  const pattern = gridPattern[index % gridPattern.length];
-  const rowOffset = Math.floor(index / gridPattern.length) * 3;
-
+function getPhotoStyle(photo: PhotoItem) {
   return {
-    "--photo-image": photo.src ? `url("${photo.src}")` : "none",
     "--photo-fill": getFallbackLayer(photo.fill),
-    "--photo-position": photo.position ?? "center",
-    "--photo-column": pattern.column,
-    "--photo-row": pattern.row + rowOffset,
   } as CSSProperties;
 }
 
@@ -144,11 +132,22 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
 
             <figure className="photo-lightbox-figure">
               <div
-                aria-label={activePhoto.alt}
-                className="photo-lightbox-image"
-                role="img"
-                style={getPhotoStyle(activePhoto, activeIndex ?? 0)}
-              />
+                className="photo-lightbox-media"
+                style={{ "--photo-fill": getFallbackLayer(activePhoto.fill) } as CSSProperties}
+              >
+                <Image
+                  alt={activePhoto.alt}
+                  className="photo-lightbox-image"
+                  decoding="async"
+                  draggable={false}
+                  height={activePhoto.height}
+                  loading="eager"
+                  sizes="100vw"
+                  src={activePhoto.src}
+                  style={{ objectPosition: activePhoto.position ?? "center" }}
+                  width={activePhoto.width}
+                />
+              </div>
 
               <figcaption className="photo-lightbox-caption">
                 <span>{activePhoto.title}</span>
@@ -180,14 +179,24 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
             className="photo-tile"
             key={photo.id}
             onClick={() => setActiveIndex(index)}
+            style={getPhotoStyle(photo)}
             type="button"
           >
-            <span
-              aria-label={photo.alt}
-              className="photo-surface"
-              role="img"
-              style={getPhotoStyle(photo, index)}
-            />
+            <span className="photo-surface">
+              <Image
+                alt={photo.alt}
+                className="photo-image"
+                decoding="async"
+                draggable={false}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                height={photo.height}
+                loading={index < 4 ? "eager" : "lazy"}
+                sizes={photoTileSizes}
+                src={photo.src}
+                style={{ objectPosition: photo.position ?? "center" }}
+                width={photo.width}
+              />
+            </span>
           </button>
         ))}
       </div>

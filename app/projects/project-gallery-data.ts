@@ -1,6 +1,8 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
 
+import { getMediaDimensions } from "../media-dimensions";
+
 export type ProjectGalleryImage = {
   fileName: string;
   id: string;
@@ -8,6 +10,8 @@ export type ProjectGalleryImage = {
   title: string;
   alt: string;
   src: string;
+  width: number;
+  height: number;
 };
 
 type ProjectGalleryItem =
@@ -34,6 +38,10 @@ const supportedExtensions = new Set([
   ...supportedImageExtensions,
   ...supportedVideoExtensions,
 ]);
+const projectImageFallbackDimensions = {
+  width: 2460,
+  height: 1280,
+};
 const naturalSort = new Intl.Collator("en", {
   numeric: true,
   sensitivity: "base",
@@ -75,6 +83,13 @@ function toProjectImage(
 ): ProjectGalleryImage {
   const kind = getProjectMediaKind(fileName);
   const title = getProjectImageTitle(fileName);
+  const dimensions =
+    kind === "video"
+      ? projectImageFallbackDimensions
+      : getMediaDimensions(
+          path.join(projectImageDirectory, projectSlug, fileName),
+          projectImageFallbackDimensions,
+        );
 
   return {
     fileName,
@@ -83,6 +98,8 @@ function toProjectImage(
     title,
     alt: `${projectName} project ${kind}: ${title}.`,
     src: `/projects/${encodeURIComponent(projectSlug)}/${encodeURIComponent(fileName)}`,
+    width: dimensions.width,
+    height: dimensions.height,
   };
 }
 

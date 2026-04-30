@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element -- Project images are folder-driven and should keep their native aspect ratio. */
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { PageHero, SiteFooter, SiteNav } from "../../components";
@@ -17,6 +17,10 @@ type ProjectPageProps = {
   }>;
 };
 
+const projectMediaSizes = "(max-width: 640px) calc(100vw - 2rem), 72rem";
+const projectMediaPairSizes =
+  "(max-width: 640px) calc((100vw - 3rem) / 2), (max-width: 980px) calc((100vw - 6rem) / 2), 34rem";
+
 function getSurfaceStyle(base: string, accent: string, glow: string) {
   return {
     "--surface-base": base,
@@ -25,23 +29,45 @@ function getSurfaceStyle(base: string, accent: string, glow: string) {
   } as CSSProperties;
 }
 
-function ProjectMedia({ media }: { media: ProjectGalleryImage }) {
+type ProjectMediaProps = {
+  media: ProjectGalleryImage;
+  sizes: string;
+  preload?: boolean;
+};
+
+function ProjectMedia({ media, sizes, preload = false }: ProjectMediaProps) {
   if (media.kind === "video") {
     return (
       <video
         aria-label={media.alt}
         autoPlay
         className="project-image project-video"
+        height={media.height}
         loop
         muted
         playsInline
         preload="metadata"
         src={media.src}
+        style={{ aspectRatio: `${media.width} / ${media.height}` }}
+        width={media.width}
       />
     );
   }
 
-  return <img alt={media.alt} className="project-image" src={media.src} />;
+  return (
+    <Image
+      alt={media.alt}
+      className="project-image"
+      decoding="async"
+      fetchPriority={preload ? "high" : "auto"}
+      height={media.height}
+      loading={preload ? "eager" : "lazy"}
+      preload={preload}
+      sizes={sizes}
+      src={media.src}
+      width={media.width}
+    />
+  );
 }
 
 export function generateStaticParams() {
@@ -110,7 +136,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         {heroImage ? (
           <div className="project-image-frame project-hero-image">
-            <ProjectMedia media={heroImage} />
+            <ProjectMedia media={heroImage} preload sizes={projectMediaSizes} />
           </div>
         ) : (
           <section
@@ -173,13 +199,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                         className="project-image-frame project-gallery-image project-gallery-image-square"
                         key={image.id}
                       >
-                        <ProjectMedia media={image} />
+                        <ProjectMedia media={image} sizes={projectMediaPairSizes} />
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="project-image-frame project-gallery-image" key={item.id}>
-                    <ProjectMedia media={item.image} />
+                    <ProjectMedia media={item.image} sizes={projectMediaSizes} />
                   </div>
                 ),
               )

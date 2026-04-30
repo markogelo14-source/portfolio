@@ -122,6 +122,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <section aria-label={`${project.name} project details`} className="project-detail-grid">
           <div className="project-detail-column">
+            <div className="small-gap-column">
             <h2 className="project-section-label">Details</h2>
 
             <div className="project-detail-list">
@@ -132,6 +133,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </p>
               ))}
             </div>
+            </div>
 
             {websiteMeta ? (
               <a
@@ -140,14 +142,24 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 rel="noreferrer"
                 target="_blank"
               >
-                {websiteMeta.value}
+                Check live project
               </a>
             ) : null}
           </div>
 
           <div className="project-detail-column project-detail-copy">
-            <h2 className="project-section-label">Overview</h2>
-            <p className="project-body">{project.detailDescription}</p>
+            <section className="project-copy-block">
+              <h2 className="project-section-label">Overview</h2>
+              <p className="project-body">{project.detailDescription}</p>
+            </section>
+
+            <section className="project-copy-block">
+              <h2 className="project-section-label">Goal</h2>
+              <p className="project-body">
+                {project.detailGoal ??
+                  "Project goal details coming soon. This section is a placeholder until final case study copy is ready."}
+              </p>
+            </section>
           </div>
         </section>
 
@@ -157,7 +169,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 item.type === "pair" ? (
                   <div className="project-gallery-pair" key={item.id}>
                     {item.images.map((image) => (
-                      <ProjectMedia key={image.id} media={image} />
+                      <div
+                        className="project-image-frame project-gallery-image project-gallery-image-square"
+                        key={image.id}
+                      >
+                        <ProjectMedia media={image} />
+                      </div>
                     ))}
                   </div>
                 ) : (

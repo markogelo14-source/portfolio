@@ -580,6 +580,38 @@ const renderedItemCopies: readonly RenderedItemCopy[] = playgroundLayout.flatMap
   ),
 );
 
+function renderCardMedia(
+  item: LayoutItem,
+  isPrimaryCopy: boolean,
+  sizes: string,
+) {
+  if (isVideoCard(item)) {
+    return (
+      <video
+        aria-label={isPrimaryCopy ? `${item.title}. ${item.caption}` : ""}
+        autoPlay
+        className="playground-card-video"
+        loop
+        muted
+        playsInline
+        src={item.image}
+      />
+    );
+  }
+
+  return (
+    <Image
+      alt={isPrimaryCopy ? `${item.title}. ${item.caption}` : ""}
+      className="playground-card-image"
+      draggable={false}
+      height={item.mediaHeight}
+      sizes={sizes}
+      src={item.image}
+      width={item.mediaWidth}
+    />
+  );
+}
+
 export function DraggablePlayground() {
   const stageRef = useRef<HTMLDivElement>(null);
   const dragSessionRef = useRef<DragSession | null>(null);
@@ -738,79 +770,85 @@ export function DraggablePlayground() {
   }, []);
 
   return (
-    <section
-      aria-label="Infinite playground of experiments and project fragments"
-      className="playground-stage"
-      data-dragging="false"
-      onLostPointerCapture={handleLostPointerCapture}
-      onPointerCancel={handlePointerCancel}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onWheel={handleWheel}
-      ref={stageRef}
-    >
-      <div className="playground-helper">
-        <span>SCROLL OR DRAG</span>
-      </div>
-
-      <div className="playground-canvas">
-        {renderedItemCopies.map((entry, index) => {
-          const isPrimaryCopy = entry.copyX === 0 && entry.copyY === 0;
-
-          return (
+    <>
+      <section
+        aria-label="Play experiments list"
+        className="playground-mobile-list"
+      >
+        <div className="playground-mobile-list-band">
+          {playgroundLayout.map((item) => (
             <article
-              aria-hidden={!isPrimaryCopy}
-              className="playground-card"
-              data-size={entry.item.size}
-              key={entry.key}
-              ref={(node) => {
-                itemRefs.current[index] = node;
-              }}
-              style={{
-                height: `${entry.item.height}px`,
-                transform: getItemTransform(
-                  entry.item,
-                  entry.copyX,
-                  entry.copyY,
-                  INITIAL_OFFSET,
-                ),
-                width: `${entry.item.width}px`,
-                zIndex: entry.item.zIndex,
-              }}
+              className="playground-mobile-card"
+              data-size={item.size}
+              key={`mobile-${item.id}`}
             >
               <div className="playground-card-media">
-                {isVideoCard(entry.item) ? (
-                  <video
-                    aria-label={isPrimaryCopy ? `${entry.item.title}. ${entry.item.caption}` : ""}
-                    autoPlay
-                    className="playground-card-video"
-                    loop
-                    muted
-                    playsInline
-                    src={entry.item.image}
-                  />
-                ) : (
-                  <Image
-                    alt={isPrimaryCopy ? `${entry.item.title}. ${entry.item.caption}` : ""}
-                    className="playground-card-image"
-                    draggable={false}
-                    height={entry.item.mediaHeight}
-                    sizes={IMAGE_SIZES[entry.item.size]}
-                    src={entry.item.image}
-                    width={entry.item.mediaWidth}
-                  />
-                )}
+                {renderCardMedia(item, true, "(max-width: 640px) calc(100vw - 2rem), 400px")}
               </div>
 
               <div className="playground-card-copy">
-                <h2 className="playground-card-title">{entry.item.title}</h2>
-                <p className="playground-card-caption">{entry.item.caption}</p>
+                <h2 className="playground-card-title">{item.title}</h2>
+                <p className="playground-card-caption">{item.caption}</p>
               </div>
             </article>
-          );
-        })}
-      </div>
-    </section>
+          ))}
+        </div>
+      </section>
+
+      <section
+        aria-label="Infinite playground of experiments and project fragments"
+        className="playground-stage"
+        data-dragging="false"
+        onLostPointerCapture={handleLostPointerCapture}
+        onPointerCancel={handlePointerCancel}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onWheel={handleWheel}
+        ref={stageRef}
+      >
+        <div className="playground-helper">
+          <span>SCROLL OR DRAG</span>
+        </div>
+
+        <div className="playground-canvas">
+          {renderedItemCopies.map((entry, index) => {
+            const isPrimaryCopy = entry.copyX === 0 && entry.copyY === 0;
+
+            return (
+              <article
+                aria-hidden={!isPrimaryCopy}
+                className="playground-card"
+                data-size={entry.item.size}
+                key={entry.key}
+                ref={(node) => {
+                  itemRefs.current[index] = node;
+                }}
+                style={{
+                  height: `${entry.item.height}px`,
+                  transform: getItemTransform(
+                    entry.item,
+                    entry.copyX,
+                    entry.copyY,
+                    INITIAL_OFFSET,
+                  ),
+                  width: `${entry.item.width}px`,
+                  zIndex: entry.item.zIndex,
+                }}
+              >
+                <div className="playground-card-media">
+                  {renderCardMedia(entry.item, isPrimaryCopy, IMAGE_SIZES[entry.item.size])}
+                </div>
+
+                <div className="playground-card-copy">
+                  <h2 className="playground-card-title">{entry.item.title}</h2>
+                  <p className="playground-card-caption">{entry.item.caption}</p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </>
   );
 }

@@ -22,6 +22,7 @@ export type Project = {
   cardGlow: string;
   detailIntro: string;
   detailDescription: string;
+  detailGoal?: string;
   detailColor: string;
   detailAccent: string;
   detailGlow: string;
@@ -43,6 +44,8 @@ export const projects: readonly Project[] = [
       "Designing the next generation of tools that help live sports competitions stay fast, readable, and reliable.",
     detailDescription:
       "A broad product design effort focused on editorial speed, clearer hierarchy, and confident data-heavy layouts for sports coverage across devices.",
+    detailGoal:
+      "Create tools that help editorial teams work faster under pressure, reduce interface friction during live coverage, and keep complex competition data easy to scan.",
     detailColor: "#d96d89",
     detailAccent: "#f08ca3",
     detailGlow: "rgba(255, 214, 226, 0.55)",
@@ -107,6 +110,8 @@ export const projects: readonly Project[] = [
       "Crafting a mobile app for new generation of workplace lunch in Croatia",
     detailDescription:
       "This mobile app simplifies food ordering at the office, offering insights into your colleagues' orders and providing monthly billing based on your previous month's spending.",
+    detailGoal:
+      "Main goal was to create a seamless mobile experience for users already familiar with the web app. The result was a user-friendly mobile app featuring playful illustrations.",
     detailColor: "#96564d",
     detailAccent: "#af6a61",
     detailGlow: "rgba(237, 214, 209, 0.48)",
@@ -171,6 +176,8 @@ export const projects: readonly Project[] = [
       "Designing a focused health dashboard that helps people read trends instead of getting lost in charts.",
     detailDescription:
       "Nutrivision is a tool that simplifies meal plan tracking and management for users. It helps nutritionists keep all their clients organized in one place, while clients can access their plans and communications easily.",
+    detailGoal:
+      "The challenge was to design an intuitive interface that effectively manages a full week's worth of meals, organized by their calorie content, for both, nutritionists and their clients. Users can effortlessly view their daily nutrient needs at a glance, making meal planning straightforward and efficient. This innovative tool not only simplifies meal management but also empowers users to make informed dietary choices with ease.",
     detailColor: "#277996",
     detailAccent: "#4497b4",
     detailGlow: "rgba(199, 240, 255, 0.5)",
@@ -235,6 +242,8 @@ export const projects: readonly Project[] = [
       "Refreshing a hosting dashboard to feel faster, lighter, and more trustworthy for technical and non-technical users alike.",
     detailDescription:
       "Easily manage all your WordPress websites in intuitive, user-friendly interface designed to maximize your productivity, minimize friction and help you succeed.",
+    detailGoal:
+      "I was tasked to revamp the user interface, develop a cohesive design system, and ultimately create a prototype. I thoroughly enjoyed working on such a fantastic product with a wonderful client.",
     detailColor: "#5faec4",
     detailAccent: "#7bc7db",
     detailGlow: "rgba(220, 248, 255, 0.54)",
@@ -299,6 +308,8 @@ export const projects: readonly Project[] = [
       "Building a premium commerce direction that balances technical storytelling with a restrained, luxury pace.",
     detailDescription:
       "Hyperlight Optics utilizes innovative lens technology that enhances visual clarity, reduces eye strain, and provides superior protection against digital screen exposure. Their lenses are engineered to improve overall eye health while offering a comfortable and clear viewing experience.",
+    detailGoal:
+      "When I got the request to design a striking website for Hyperlight Optics, an eyewear brand under the well-known Zepter company, I felt excited about the journey ahead. The client wanted a website that was modern, innovative, and futuristic, with a playful layout that would catch users' attention. The goal was clear: the design needed to showcase the advanced technology behind their glasses. After some research and creative brainstorming, we found a solution that truly matched the spirit of the new brand, leading to an engaging experience for users that represents the excellence of Hyperlight Optics.",
     detailColor: "#1f1f1f",
     detailAccent: "#353535",
     detailGlow: "rgba(255, 255, 255, 0.18)",

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SiteNav } from "../components";
+import { SiteFooter, SiteNav } from "../components";
 import { DraggablePlayground } from "./draggable-playground";
 
 export const metadata: Metadata = {
@@ -13,6 +13,7 @@ export default function PlayPage() {
     <main className="portfolio-page playground-page">
       <SiteNav currentLabel="Play" />
       <DraggablePlayground />
+      <SiteFooter />
     </main>
   );
 }

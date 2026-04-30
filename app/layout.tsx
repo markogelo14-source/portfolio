@@ -28,9 +28,9 @@ const romieTrial = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Marko Gelo | Product designer @ Sofascore",
+  title: "Marko Gelo Portfolio",
   description:
-    "Editorial portfolio for Marko Gelo, a product designer building thoughtful digital experiences.",
+    "Product designer at Sofascore",
 };
 
 export default function RootLayout({

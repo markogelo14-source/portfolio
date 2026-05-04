@@ -74,9 +74,6 @@ export function SiteNav({ breadcrumb, currentLabel = "Work" }: SiteNavProps) {
               <SmartLink className="nav-link nav-link-muted" href="/about">
                 About
               </SmartLink>
-              <SmartLink className="nav-link nav-link-muted" href="/play">
-                Play
-              </SmartLink>
               <SmartLink className="nav-link nav-link-muted" href="/photos">
                 Photos
               </SmartLink>
@@ -110,12 +107,6 @@ export function SiteNav({ breadcrumb, currentLabel = "Work" }: SiteNavProps) {
               href="/about"
             >
               About
-            </SmartLink>
-            <SmartLink
-              className={`nav-link ${currentLabel === "Play" ? "nav-link-current" : "nav-link-muted"}`}
-              href="/play"
-            >
-              Play
             </SmartLink>
             <SmartLink
               className={`nav-link ${currentLabel === "Photos" ? "nav-link-current" : "nav-link-muted"}`}

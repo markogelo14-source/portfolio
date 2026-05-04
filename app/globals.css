@@ -402,6 +402,17 @@ html.page-transition-entering body > .portfolio-page {
     0 24px 56px rgba(0, 0, 0, 0.08);
 }
 
+.project-card-disabled {
+  cursor: default;
+}
+
+.project-card-disabled:hover {
+  transform: none;
+  box-shadow:
+    inset 0 -16px 74px rgba(255, 255, 255, 0.7),
+    0 18px 48px rgba(0, 0, 0, 0.06);
+}
+
 .project-card-top {
   display: flex;
   align-items: flex-start;

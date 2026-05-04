@@ -14,6 +14,7 @@ type ProjectPanel = {
 export type Project = {
   slug: string;
   name: string;
+  isAvailable?: boolean;
   kicker: string;
   cardStatus?: string;
   cardSummary: string;
@@ -34,6 +35,7 @@ export const projects: readonly Project[] = [
   {
     slug: "sofascore",
     name: "Sofascore",
+    isAvailable: false,
     kicker: "Mobile & Web app",
     cardStatus: "Coming soon!",
     cardSummary: "Working on the most advanced competition editor in the world.",
@@ -374,5 +376,13 @@ export function getNextProject(slug: string) {
     return null;
   }
 
-  return projects[(currentIndex + 1) % projects.length];
+  for (let offset = 1; offset < projects.length; offset += 1) {
+    const candidate = projects[(currentIndex + offset) % projects.length];
+
+    if (candidate?.isAvailable !== false) {
+      return candidate;
+    }
+  }
+
+  return null;
 }

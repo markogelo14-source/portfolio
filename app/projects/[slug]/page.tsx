@@ -71,9 +71,11 @@ function ProjectMedia({ media, sizes, preload = false }: ProjectMediaProps) {
 }
 
 export function generateStaticParams() {
-  return projects.map((project) => ({
+  return projects
+    .filter((project) => project.isAvailable !== false)
+    .map((project) => ({
     slug: project.slug,
-  }));
+    }));
 }
 
 export async function generateMetadata({
@@ -82,7 +84,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const project = getProjectBySlug(slug);
 
-  if (!project) {
+  if (!project || project.isAvailable === false) {
     return {
       title: "Marko Gelo",
       description:
@@ -100,7 +102,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params;
   const project = getProjectBySlug(slug);
 
-  if (!project) {
+  if (!project || project.isAvailable === false) {
     notFound();
   }
 

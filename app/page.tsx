@@ -31,29 +31,54 @@ export default function Home() {
 
       <section aria-label="Selected work" className="site-band project-stack" id="work">
         {projects.map((project) => (
-          <PageTransitionLink
-            className="project-card"
-            href={`/projects/${project.slug}`}
-            key={project.slug}
-            style={
-              {
-                "--project-base": project.cardColor,
-                "--project-accent": project.cardAccent,
-                "--project-glow": project.cardGlow,
-              } as CSSProperties
-            }
-          >
-            <div className="project-card-top">
-              <div className="project-card-copy">
-                <p className="project-kicker">{project.kicker}</p>
-                <h2 className="project-card-title">{project.name}</h2>
+          project.isAvailable === false ? (
+            <article
+              className="project-card project-card-disabled"
+              key={project.slug}
+              style={
+                {
+                  "--project-base": project.cardColor,
+                  "--project-accent": project.cardAccent,
+                  "--project-glow": project.cardGlow,
+                } as CSSProperties
+              }
+            >
+              <div className="project-card-top">
+                <div className="project-card-copy">
+                  <p className="project-kicker">{project.kicker}</p>
+                  <h2 className="project-card-title">{project.name}</h2>
+                </div>
+
+                {project.cardStatus ? <p className="project-status">{project.cardStatus}</p> : null}
               </div>
 
-              {project.cardStatus ? <p className="project-status">{project.cardStatus}</p> : null}
-            </div>
+              <p className="project-summary">{project.cardSummary}</p>
+            </article>
+          ) : (
+            <PageTransitionLink
+              className="project-card"
+              href={`/projects/${project.slug}`}
+              key={project.slug}
+              style={
+                {
+                  "--project-base": project.cardColor,
+                  "--project-accent": project.cardAccent,
+                  "--project-glow": project.cardGlow,
+                } as CSSProperties
+              }
+            >
+              <div className="project-card-top">
+                <div className="project-card-copy">
+                  <p className="project-kicker">{project.kicker}</p>
+                  <h2 className="project-card-title">{project.name}</h2>
+                </div>
 
-            <p className="project-summary">{project.cardSummary}</p>
-          </PageTransitionLink>
+                {project.cardStatus ? <p className="project-status">{project.cardStatus}</p> : null}
+              </div>
+
+              <p className="project-summary">{project.cardSummary}</p>
+            </PageTransitionLink>
+          )
         ))}
       </section>
 

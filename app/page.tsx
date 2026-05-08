@@ -19,13 +19,13 @@ export default function Home() {
               </span>
               <span className="home-identity-role">
                 Product designer @{" "}
-                <a className="home-identity-link" href="https://www.sofascore.com/hr">
+                <a className="home-identity-link" href="https://corporate.sofascore.com/">
                   <span className="underline">Sofascore</span>
                 </a>
               </span>
             </p>
           }
-          title="I like to design and experiment."
+          title="Product designer drawn to structure, exploration, and intuitive experiences."
         />
       </section>
 

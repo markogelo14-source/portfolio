@@ -15,7 +15,7 @@ type PhotoGalleryProps = {
 const photoTileSizes = [
   "(max-width: 640px) calc((100vw - 2.5rem) / 2)",
   "(max-width: 980px) calc((100vw - 3rem) / 3)",
-  "calc((min(100vw - 2rem, 73.875rem) - 1.5rem) / 4)",
+  "calc((min(100vw - 2rem, 57rem) - 1rem) / 3)",
 ].join(", ");
 
 function getFallbackLayer(fill?: string) {

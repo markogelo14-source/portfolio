@@ -313,6 +313,9 @@ html.page-transition-entering body > .portfolio-page {
 
 .home-identity-link {
   color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
 }
 
 .project-detail-stack {
@@ -360,7 +363,6 @@ html.page-transition-entering body > .portfolio-page {
   color: var(--muted);
 }
 
-.project-stack,
 .gallery-stack {
   display: flex;
   flex-direction: column;
@@ -368,7 +370,19 @@ html.page-transition-entering body > .portfolio-page {
 }
 
 .project-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2rem, 3vw, 2.5rem);
   padding-bottom: 5rem;
+}
+
+.project-stack > :first-child {
+  grid-column: 1 / -1;
+}
+
+.project-stack > :not(:first-child) {
+  min-height: 0;
+  aspect-ratio: 1 / 1;
 }
 
 .project-card,
@@ -950,14 +964,14 @@ body.playground-dragging * {
 
 .photo-grid {
   display: grid;
-  width: min(100%, 73.875rem);
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 57rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   margin-inline: auto;
 }
 
 .photo-tile {
-  aspect-ratio: 29 / 40;
+  aspect-ratio: 29 / 36;
 }
 
 .photo-tile {
@@ -1100,6 +1114,19 @@ body.playground-dragging * {
     max-width: 100%;
   }
 
+  .project-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .project-stack > :first-child {
+    grid-column: auto;
+  }
+
+  .project-stack > :not(:first-child) {
+    aspect-ratio: auto;
+    min-height: 23.125rem;
+  }
+
   .site-footer-shell {
     align-items: flex-start;
     flex-direction: column;
@@ -1207,6 +1234,10 @@ body.playground-dragging * {
     min-height: 18.5rem;
   }
 
+  .project-stack > :not(:first-child) {
+    min-height: 18.5rem;
+  }
+
   .visual-surface-large,
   .visual-surface-gallery {
     min-height: 18rem;
@@ -1234,7 +1265,7 @@ body.playground-dragging * {
   }
 
   .photo-tile {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 8 / 9;
   }
 
   .photo-lightbox {

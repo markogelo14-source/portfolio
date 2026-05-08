@@ -19,7 +19,7 @@ export default function PhotosPage() {
       <section className="site-band page-hero-band">
         <PageHero
           eyebrow={<p className="page-hero-label">Photos</p>}
-          title="Little bit of this, little bit of that..."
+          title="Photography became another way to observe details."
         />
       </section>
 

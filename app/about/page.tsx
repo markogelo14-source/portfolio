@@ -22,8 +22,10 @@ export default function AboutPage() {
       <section className="site-band about-page-body">
         <div className="about-copy">
           <p>
-            Currently designing at Sofascore, where I work on digital products that make dense sports data feel faster,
-            clearer, and easier to use.
+            Currently designing at{" "}
+            <a className="home-identity-link" href="https://corporate.sofascore.com/">
+              <span className="underline">Sofascore</span>
+            </a>, where I work on digital products that make dense sports data feel faster, clearer, and easier to use.
           </p>
           <p>
             Before that, I worked across mobile apps, dashboards, websites, and design systems for teams that needed

@@ -1,5 +1,6 @@
 import localFont from "next/font/local";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 
@@ -40,7 +41,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${circularStd.variable} ${romieTrial.variable}`}>{children}</body>
+      <body className={`${circularStd.variable} ${romieTrial.variable}`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

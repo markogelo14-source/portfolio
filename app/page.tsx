@@ -1,12 +1,38 @@
 import type { CSSProperties } from "react";
 
 import { PageHero, SiteFooter, SiteNav } from "./components";
+import { HomeIntroAnimator } from "./home-intro-animator";
 import { PageTransitionLink } from "./page-transition-link";
 import { projects } from "./projects/project-data";
 
+const homeHeadline = "Product designer drawn to structure, exploration, and intuitive experiences.";
+
+function renderAnimatedHeadline(title: string) {
+  return title.split(" ").map((word, index, words) => (
+    <span className="intro-headline-word-wrap" key={`${word}-${index}`}>
+      <span className="intro-headline-word">
+        {word}
+        {index < words.length - 1 ? "\u00A0" : null}
+      </span>
+    </span>
+  ));
+}
+
 export default function Home() {
   return (
-    <main className="portfolio-page">
+    <main className="portfolio-page" data-home-intro="true" data-home-intro-state="pending">
+      <noscript>
+        <style>{`
+          main[data-home-intro="true"] .site-header,
+          main[data-home-intro="true"] .page-hero-eyebrow,
+          main[data-home-intro="true"] .intro-headline-word,
+          main[data-home-intro="true"] .project-stack > * {
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        `}</style>
+      </noscript>
+
       <SiteNav />
 
       <section className="site-band page-hero-band">
@@ -25,7 +51,7 @@ export default function Home() {
               </span>
             </p>
           }
-          title="Product designer drawn to structure, exploration, and intuitive experiences."
+          title={renderAnimatedHeadline(homeHeadline)}
         />
       </section>
 
@@ -83,6 +109,7 @@ export default function Home() {
       </section>
 
       <SiteFooter />
+      <HomeIntroAnimator />
     </main>
   );
 }

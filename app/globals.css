@@ -106,11 +106,16 @@ html.page-transition-entering body > .portfolio-page {
 .intro-headline-word-wrap {
   display: inline-block;
   overflow: hidden;
-  vertical-align: top;
+  padding-top: 0.08em;
+  padding-bottom: 0.16em;
+  margin-top: -0.08em;
+  margin-bottom: -0.16em;
+  vertical-align: baseline;
 }
 
 .intro-headline-word {
   display: inline-block;
+  line-height: inherit;
   will-change: transform, opacity;
 }
 
@@ -490,7 +495,7 @@ html.page-transition-entering body > .portfolio-page {
   color: var(--soft-muted);
   font-size: clamp(2.875rem, 5.2vw, 3rem);
   font-weight: 400;
-  line-height: 1.1;
+  line-height: 1.04;
   letter-spacing: -0.035em;
 }
 
